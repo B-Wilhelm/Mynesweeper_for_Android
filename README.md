@@ -1,1 +1,1 @@
-# Mynesweeper_for_Android
+# Mynesweeper - A Minesweeper-like game/application for android devices.
