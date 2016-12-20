@@ -9,12 +9,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private SpriteBatch batch;
 	private Texture img;
     private Sprite sprite;
     private BitmapFont font;
+    FreeTypeFontGenerator fontGen;
+    FreeTypeFontGenerator.FreeTypeFontParameter param;
+
     private static int WIN_HEIGHT, WIN_WIDTH;
 
     // Blue Background
@@ -34,7 +38,11 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		batch = new SpriteBatch();
 		img = new Texture("minesweep.png");
         sprite = new Sprite(img);
-        font = new BitmapFont();
+
+        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        font = fontGen.generateFont(param);
 
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
