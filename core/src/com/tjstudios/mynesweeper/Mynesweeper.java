@@ -7,20 +7,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Mynesweeper extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-    private static int WIN_HEIGHT;
-    private static int WIN_WIDTH;
+	private SpriteBatch batch;
+	private Texture img;
+    private static int WIN_HEIGHT, WIN_WIDTH;
 
     // Blue Background
-    private static float BKGD_RED = .22f;
-    private static float BKGD_GREEN = .624f;
-    private static float BKGD_BLUE = .761f;
+    private static final float BKGD_RED = .22f;
+    private static final float BKGD_GREEN = .624f;
+    private static final float BKGD_BLUE = .761f;
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		img = new Texture("minesweep.png");
 
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
