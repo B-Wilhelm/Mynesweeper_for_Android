@@ -41,12 +41,13 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
-
+        param.size = 48;
+        param.minFilter = Texture.TextureFilter.Linear;
+        param.magFilter = Texture.TextureFilter.Linear;
         font = fontGen.generateFont(param);
 
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
-
         posX = WIN_WIDTH/2-img.getWidth()/2;
         posY = WIN_HEIGHT/2-img.getHeight()/2;
 
