@@ -17,7 +17,7 @@ import static java.lang.Character.toUpperCase;
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private SpriteBatch batch;
 	private Texture img;
-    private Sprite sprite;
+    private Sprite sprite, spriteBorder;
     private BitmapFont font;
     FreeTypeFontGenerator fontGen;
     FreeTypeFontGenerator.FreeTypeFontParameter param;
@@ -40,6 +40,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("minesweep.png");
+        spriteBorder = new Sprite(img);
+        spriteBorder.setScale(1.02f, 1.02f);
+        spriteBorder.setColor(Color.BLACK);
         sprite = new Sprite(img);
 
         fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
@@ -65,8 +68,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         sprite.setPosition(posX, posY);
+        spriteBorder.setPosition(posX, posY);
 
 		batch.begin();
+        spriteBorder.draw(batch);
 		sprite.draw(batch);
         font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);
 		batch.end();
@@ -164,7 +169,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         posX = posX - scrollScale/2;
         posY = posY - scrollScale/2;
-        sprite.setSize(sprite.getWidth() + scrollScale, sprite.getHeight() + scrollScale);          // Should scale image as scrolling occurs
+        spriteBorder.setSize(spriteBorder.getWidth() + scrollScale, spriteBorder.getHeight() + scrollScale);          // Should scale image as scrolling occurs
+        sprite.setSize(sprite.getWidth() + scrollScale, sprite.getHeight() + scrollScale);                            // Should scale image as scrolling occurs
 
         return true;
     }
