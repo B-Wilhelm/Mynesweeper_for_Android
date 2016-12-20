@@ -21,6 +21,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private static final float BKGD_BLUE = .761f;
 
     private float posX, posY;
+    private boolean isKeyPressed = false;
+    private boolean isLeftTouchPressed = false;
+    private boolean isRightTouchPressed = false;
 	
 	@Override
 	public void create () {
@@ -70,18 +73,21 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		float moveAmount = 1.0f;
-		if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
-			moveAmount = 10.0f;
+
 		if(keycode == Input.Keys.LEFT)
 			posX-=moveAmount;
 		if(keycode == Input.Keys.RIGHT)
 			posX+=moveAmount;
+
+        isKeyPressed = true;
+
 		return true;
 	}
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
+        isKeyPressed = false;
+        return true;
     }
 
     @Override
@@ -94,25 +100,33 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         if(button == Input.Buttons.LEFT){
             posX = screenX - sprite.getWidth()/2;
             posY = Gdx.graphics.getHeight() - screenY - sprite.getHeight()/2;
+            isLeftTouchPressed = true;
         }
         if(button == Input.Buttons.RIGHT){
             posX = Gdx.graphics.getWidth()/2 - sprite.getWidth()/2;
             posY = Gdx.graphics.getHeight()/2 - sprite.getHeight()/2;
+            isRightTouchPressed = true;
         }
-        return false;
+
+        return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
+        isLeftTouchPressed = false;
+        isRightTouchPressed = false;
+
+        return true;
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        posX = screenX - sprite.getWidth()/2;
-        posY = Gdx.graphics.getHeight() - screenY - sprite.getHeight()/2;
+        if(isLeftTouchPressed) {
+            posX = screenX - sprite.getWidth() / 2;
+            posY = Gdx.graphics.getHeight() - screenY - sprite.getHeight() / 2;
+        }
 
-        return false;
+        return true;
     }
 
     @Override
@@ -122,6 +136,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
-        return false;
+        sprite.setSize(img.getWidth() + amount * .16f, img.getHeight() + amount * .16f);   // Should scale image as scrolling occurs
+
+        return true;
     }
 }
