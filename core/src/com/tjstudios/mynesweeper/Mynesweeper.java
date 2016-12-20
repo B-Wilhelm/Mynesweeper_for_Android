@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -13,6 +14,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private SpriteBatch batch;
 	private Texture img;
     private Sprite sprite;
+    private BitmapFont font;
     private static int WIN_HEIGHT, WIN_WIDTH;
 
     // Blue Background
@@ -24,12 +26,15 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private boolean isKeyPressed = false;
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
+
+    private String inputKey = "";
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("minesweep.png");
         sprite = new Sprite(img);
+        font = new BitmapFont();
 
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
@@ -49,6 +54,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
 		batch.begin();
 		sprite.draw(batch);
+        font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);
 		batch.end();
 	}
 	
@@ -92,7 +98,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        return false;
+        inputKey = character + "";
+
+        return true;
     }
 
     @Override
@@ -142,7 +150,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         posX = posX - scrollScale/2;
         posY = posY - scrollScale/2;
-        sprite.setSize(sprite.getWidth() + scrollScale, sprite.getHeight() + scrollScale);   // Should scale image as scrolling occurs
+        sprite.setSize(sprite.getWidth() + scrollScale, sprite.getHeight() + scrollScale);          // Should scale image as scrolling occurs
 
         return true;
     }
