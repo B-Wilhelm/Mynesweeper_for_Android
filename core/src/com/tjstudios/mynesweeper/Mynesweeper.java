@@ -184,6 +184,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         img = new Texture("minesweep.png");
         spriteLogo = new Sprite(img);
         spriteLogo.setSize(spriteLogo.getWidth()/2, spriteLogo.getHeight()/2);
+        spriteLogo.setAlpha(0f);
     }
 
     private void initFont(){
