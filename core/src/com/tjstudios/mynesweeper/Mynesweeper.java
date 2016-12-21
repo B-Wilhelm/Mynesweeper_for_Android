@@ -176,7 +176,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         posX = posX - scrollScale/2;
         posY = posY - scrollScale/2;
 
-        sprite.setSize(sprite.getWidth() + scrollScale, sprite.getHeight() + scrollScale);                            // Should scale image as scrolling occurs
+        sprite.setSize(Math.max(sprite.getWidth() + scrollScale, 1), Math.max(sprite.getHeight() + scrollScale, 1));                            // Should scale image as scrolling occurs
 
         return true;
     }
