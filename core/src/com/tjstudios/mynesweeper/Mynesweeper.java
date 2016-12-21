@@ -30,10 +30,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private static final float BKGD_BLUE = .761f;
 
     private float posX, posY;
-    private boolean isKeyPressed = false;
+    private boolean isDKeyPressed = false;
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
-    private int curKeyCode = 0;
 
     private String inputKey = "";
 	
@@ -97,14 +96,18 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-        keyPress.add(new buttonCheck(keycode, true));;
+        if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP){
+            keyPress.add(new buttonCheck(keycode, true));
+        }
 
 		return true;
 	}
 
     @Override
     public boolean keyUp(int keycode) {
-        keyPress.remove(keyPress.indexOf(new buttonCheck(keycode, true)));
+        if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP) {
+            keyPress.remove(keyPress.indexOf(new buttonCheck(keycode, true)));
+        }
 
         return true;
     }
