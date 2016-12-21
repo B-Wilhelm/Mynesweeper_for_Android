@@ -11,8 +11,8 @@ public class DesktopLauncher {
 		config.width = 1920;
 		config.height = 1080;
 		config.vSyncEnabled = false; // Setting to false disables vertical sync
-		config.foregroundFPS = 0; // Setting to 0 disables foreground fps throttling
-		config.backgroundFPS = 0; // Setting to 0 disables background fps throttling
+		config.foregroundFPS = 120; // Setting to 0 disables foreground fps throttling
+		config.backgroundFPS = 120; // Setting to 0 disables background fps throttling
 		new LwjglApplication(new Mynesweeper(), config);
 	}
 }
