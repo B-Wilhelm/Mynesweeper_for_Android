@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import java.util.ArrayList;
 
+import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
@@ -30,7 +31,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private static final float BKGD_BLUE = .761f;
 
     private float posX, posY;
-    private boolean isDKeyPressed = false;
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
 
@@ -69,7 +69,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		batch.begin();
 		    sprite.draw(batch);
             font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);
-
             if(keyPress.size() > 0){
                 moveLogo(keyPress.get(keyPress.size()-1).getKeycode());
             }
@@ -113,8 +112,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     }
 
     @Override
-    public boolean keyTyped(char character) {
-        inputKey = toUpperCase(character) + "";
+    public boolean keyTyped(char c) {
+        if(isLetterOrDigit(c)){
+            inputKey = toUpperCase(c) + "";
+        }
 
         return true;
     }
