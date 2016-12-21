@@ -22,7 +22,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private Texture img;
     private Sprite sprite;
     private BitmapFont font;
-    private FreeTypeFontGenerator fontGen;
     private ArrayList<buttonCheck> keyPress = new ArrayList<buttonCheck>();
 
     // Blue Background
@@ -45,7 +44,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         sprite = new Sprite(img);
         sprite.setSize(sprite.getWidth()/2, sprite.getHeight()/2);
 
-        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
+
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
         param.size = 48;
         param.borderWidth = 4;
