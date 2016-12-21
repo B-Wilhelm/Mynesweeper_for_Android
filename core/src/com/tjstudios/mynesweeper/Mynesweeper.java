@@ -11,76 +11,39 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
 import java.util.ArrayList;
-
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
-	private SpriteBatch batch;
-	private Texture img;
-    private Sprite sprite;
-    private BitmapFont font;
-    private ArrayList<buttonCheck> keyPress = new ArrayList<buttonCheck>();
-
-    // Blue Background
-    private static final float BKGD_RED = .22f;
+    private static final float BKGD_RED = .22f;                                                         // Blue Background
     private static final float BKGD_GREEN = .624f;
     private static final float BKGD_BLUE = .761f;
-    private static int WIN_WIDTH = 0;
-    private static int WIN_HEIGHT = 0;
-
+	private SpriteBatch batch;                                                                          // Used for spriteLogo initialization
+	private Texture img;
+    private Sprite spriteLogo;
+    private BitmapFont font;
+    private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                             // Used for smoothing out directional key movement
+    private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
     private float posX, posY;
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
-
     private String inputKey = "";
 	
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
-		img = new Texture("minesweep.png");
-        sprite = new Sprite(img);
-        sprite.setSize(sprite.getWidth()/2, sprite.getHeight()/2);
-
-
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        param.size = 48;
-        param.borderWidth = 4;
-        param.borderColor = Color.BLACK;
-        param.minFilter = Texture.TextureFilter.Linear;
-        param.magFilter = Texture.TextureFilter.Linear;
-        font = fontGen.generateFont(param);
-
-        WIN_HEIGHT = Gdx.graphics.getHeight();
-        WIN_WIDTH = Gdx.graphics.getWidth();
-        posX = WIN_WIDTH/2-sprite.getWidth()/2;
-        posY = WIN_HEIGHT/2-sprite.getHeight()/2;
-
+		initSprite();                                                                                   // Create texture, image and then spriteLogo
+        initFont();                                                                                     // Creates freetype font and sets its properties
+        storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
         Gdx.input.setInputProcessor(this);
 	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(BKGD_RED, BKGD_GREEN, BKGD_BLUE, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-        posX = Math.min(posX, WIN_WIDTH - sprite.getWidth());                                           // Ensures sprite doesn't leave bounds of window
-        posY = Math.min(posY, WIN_HEIGHT - sprite.getHeight());
-        posX = Math.max(posX, 0);
-        posY = Math.max(posY, 0);
-
-        sprite.setPosition(posX, posY);
-
-		batch.begin();
-		    sprite.draw(batch);                                                                         // Draws sprite (Logo)
-            font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);       // Draws alphanumeric char at top of screen
-            if(keyPress.size() > 0){                                                                    // Checks for keypress
-                moveLogo(keyPress.get(keyPress.size()-1).getKeycode());                                 // If key is pressed, sprite is moved
-            }
-		batch.end();
+		setBackground();                                                                                // Sets background color
+//        collisionCheck();                                                                               // Ensures spriteLogo doesn't collide with window borders
+//        spriteLogo.setPosition(posX, posY);                                                             // Positions spriteLogo
+        batchProcess();
 	}
 	
 	@Override
@@ -88,6 +51,16 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		batch.dispose();
 		img.dispose();
 	}
+
+	private void batchProcess() {
+        batch.begin();
+            spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
+            font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);       // Draws alphanumeric char at top of screen
+//            if(keypressArray.size() > 0){
+//                moveLogoArrowKeys(keypressArray.get(keypressArray.size()-1).getKeycode());                       // If key is pressed, spriteLogo is moved
+//            }
+        batch.end();
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -104,7 +77,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
         if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP){
-            keyPress.add(new buttonCheck(keycode, true));
+            keypressArray.add(new buttonCheck(keycode, true));
         }
 
 		return true;
@@ -113,7 +86,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean keyUp(int keycode) {
         if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP) {
-            keyPress.remove(keyPress.indexOf(new buttonCheck(keycode, true)));
+            keypressArray.remove(keypressArray.indexOf(new buttonCheck(keycode, true)));
         }
 
         return true;
@@ -131,13 +104,13 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if(button == Input.Buttons.LEFT){
-            posX = screenX - sprite.getWidth()/2;
-            posY = Gdx.graphics.getHeight() - screenY - sprite.getHeight()/2;
+            posX = screenX - spriteLogo.getWidth()/2;
+            posY = Gdx.graphics.getHeight() - screenY - spriteLogo.getHeight()/2;
             isLeftTouchPressed = true;
         }
         if(button == Input.Buttons.RIGHT){
-            posX = Gdx.graphics.getWidth()/2 - sprite.getWidth()/2;
-            posY = Gdx.graphics.getHeight()/2 - sprite.getHeight()/2;
+            posX = Gdx.graphics.getWidth()/2 - spriteLogo.getWidth()/2;
+            posY = Gdx.graphics.getHeight()/2 - spriteLogo.getHeight()/2;
             isRightTouchPressed = true;
         }
 
@@ -155,8 +128,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if(isLeftTouchPressed) {
-            posX = screenX - sprite.getWidth() / 2;
-            posY = Gdx.graphics.getHeight() - screenY - sprite.getHeight() / 2;
+            posX = screenX - spriteLogo.getWidth() / 2;
+            posY = Gdx.graphics.getHeight() - screenY - spriteLogo.getHeight() / 2;
         }
 
         return true;
@@ -176,12 +149,12 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         posX = posX - scrollScale/2;
         posY = posY - scrollScale/2;
 
-        sprite.setSize(Math.max(sprite.getWidth() + scrollScale, 1), Math.max(sprite.getHeight() + scrollScale, 1));                            // Should scale image as scrolling occurs
+        spriteLogo.setSize(Math.max(spriteLogo.getWidth() + scrollScale, 1), Math.max(spriteLogo.getHeight() + scrollScale, 1));                            // Should scale image as scrolling occurs
 
         return true;
     }
 
-    private void moveLogo(int keycode){
+    private void moveLogoArrowKeys(int keycode){
         float moveAmount = 8.0f;
 
         if(keycode == Input.Keys.LEFT)
@@ -194,13 +167,50 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
             posY+=moveAmount;
     }
 
+    private void collisionCheck(){
+        posX = Math.min(posX, WIN_WIDTH - spriteLogo.getWidth());                                           // Ensures spriteLogo doesn't leave bounds of window
+        posY = Math.min(posY, WIN_HEIGHT - spriteLogo.getHeight());
+        posX = Math.max(posX, 0);
+        posY = Math.max(posY, 0);
+    }
+
+    private void setBackground(){
+        Gdx.gl.glClearColor(BKGD_RED, BKGD_GREEN, BKGD_BLUE, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+    }
+
+    private void initSprite(){
+        batch = new SpriteBatch();
+        img = new Texture("minesweep.png");
+        spriteLogo = new Sprite(img);
+        spriteLogo.setSize(spriteLogo.getWidth()/2, spriteLogo.getHeight()/2);
+    }
+
+    private void initFont(){
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        param.size = 48;
+        param.borderWidth = 4;
+        param.borderColor = Color.BLACK;
+        param.minFilter = Texture.TextureFilter.Linear;
+        param.magFilter = Texture.TextureFilter.Linear;
+        font = fontGen.generateFont(param);
+    }
+
+    private void storeWindowAndPosition(){
+        WIN_HEIGHT = Gdx.graphics.getHeight();
+        WIN_WIDTH = Gdx.graphics.getWidth();
+        posX = WIN_WIDTH/2-spriteLogo.getWidth()/2;
+        posY = WIN_HEIGHT/2-spriteLogo.getHeight()/2;
+    }
+
     private class buttonCheck extends Mynesweeper {
         private int keycode;
-        private boolean keyPress;
+        private boolean keypressArray;
 
         private buttonCheck(int key, boolean press) {
             keycode = key;
-            keyPress = press;
+            keypressArray = press;
         }
 
         private int getKeycode(){
@@ -210,7 +220,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         public boolean equals(Object o) {
             if(!(o instanceof buttonCheck)) return false;
             buttonCheck other = (buttonCheck) o;
-            return (this.keycode == other.keycode && this.keyPress == other.keyPress);
+            return (this.keycode == other.keycode && this.keypressArray == other.keypressArray);
         }
     }
 }
