@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -40,8 +41,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	
 	@Override
 	public void create () {
-        camera = new OrthographicCamera(2560, 1440);
-        viewport = new FitViewport(2560, 1440, camera);
+        camera = new OrthographicCamera(1440, 2560);
+        viewport = new FitViewport(1440, 2560, camera);
         shape = new ShapeRenderer();
 		initSprite();                                                                                   // Create texture, image and then spriteLogo
         initFont();                                                                                     // Creates freetype font and sets its properties
