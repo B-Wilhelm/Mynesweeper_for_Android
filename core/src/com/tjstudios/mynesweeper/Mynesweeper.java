@@ -76,19 +76,21 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     }
 
     private void shapeProcess() {
+        float btmRectHeight = WIN_HEIGHT/8;
+
         shape.setColor(Color.DARK_GRAY);    // Top-of-screen rectangle
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(0, 300+sqSide*8, WIN_WIDTH, WIN_HEIGHT-300-sqSide*8);
+        shape.rect(0, btmRectHeight+sqSide*8, WIN_WIDTH, WIN_HEIGHT-btmRectHeight-sqSide*8);
         shape.end();
 
         shape.setColor(Color.DARK_GRAY);    // Bottom-of-screen rectangle
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(0, 0, WIN_WIDTH, 300);
+        shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
 
         shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(30, 30, WIN_WIDTH-60, 240);
+        shape.rect(30, btmRectHeight/10, WIN_WIDTH-60, btmRectHeight*8/10);
         shape.end();
 
         float sqPos;
@@ -98,13 +100,13 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
                 shape.setColor(Color.LIGHT_GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
                 sqPos = sqSide;
-                shape.rect(j*(sqPos), i*(sqPos)+300, sqSide, sqSide);
+                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
                 shape.end();
 
                 shape.setColor(Color.GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
                 sqPos = (WIN_WIDTH-WIN_WIDTH*.9f)/8/2;
-                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+300 + sqPos, sqSide*.9f, sqSide*.9f);
+                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.9f, sqSide*.9f);
                 shape.end();
             }
         }
