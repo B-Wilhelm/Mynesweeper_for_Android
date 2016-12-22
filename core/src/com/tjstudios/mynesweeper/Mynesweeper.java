@@ -6,19 +6,27 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
 import java.util.ArrayList;
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
-    private static final float BKGD_RED = .22f;                                                         // Blue Background
-    private static final float BKGD_GREEN = .624f;
-    private static final float BKGD_BLUE = .761f;
+    private static final float BKGD_RED = 128f/255f;                                                         // Blue Background
+    private static final float BKGD_GREEN = 128f/255f;
+    private static final float BKGD_BLUE = 128f/255f;
+    private ShapeRenderer shape;
+    private OrthographicCamera camera;
+    private Viewport viewport;
 	private SpriteBatch batch;                                                                          // Used for spriteLogo initialization
 	private Texture img;
     private Sprite spriteLogo;
@@ -32,6 +40,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	
 	@Override
 	public void create () {
+        camera = new OrthographicCamera(2560, 1440);
+        viewport = new FitViewport(2560, 1440, camera);
+        shape = new ShapeRenderer();
 		initSprite();                                                                                   // Create texture, image and then spriteLogo
         initFont();                                                                                     // Creates freetype font and sets its properties
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
@@ -43,7 +54,12 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		setBackground();                                                                                // Sets background color
 //        collisionCheck();                                                                               // Ensures spriteLogo doesn't collide with window borders
 //        spriteLogo.setPosition(posX, posY);                                                             // Positions spriteLogo
+
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+
         batchProcess();
+        shapeProcess();
 	}
 	
 	@Override
@@ -62,8 +78,30 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         batch.end();
     }
 
+    private void shapeProcess() {
+//        shape.setColor(Color.GRAY);
+//        shape.begin(ShapeRenderer.ShapeType.Filled);
+//        shape.rect(0, 300, WIN_WIDTH, WIN_HEIGHT);
+//        shape.end();
+
+        shape.setColor(Color.DARK_GRAY);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.rect(0, 0, WIN_WIDTH, 300);
+        shape.end();
+
+        shape.setColor(Color.BLUE);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.rect(30, 30, 660, 240);
+        shape.end();
+
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.rect(WIN_WIDTH-690, 30, 660, 240);
+        shape.end();
+    }
+
     @Override
     public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 
     @Override
