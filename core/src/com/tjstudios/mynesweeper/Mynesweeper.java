@@ -13,8 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
@@ -22,9 +21,9 @@ import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
-    private static final float BKGD_RED = 128f/255f;                                                         // Blue Background
-    private static final float BKGD_GREEN = 128f/255f;
-    private static final float BKGD_BLUE = 128f/255f;
+    private static final float BKGD_RED = 0f/255f;                                                         // Blue Background
+    private static final float BKGD_GREEN = 0f/255f;
+    private static final float BKGD_BLUE = 0f/255f;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -41,24 +40,23 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	
 	@Override
 	public void create () {
-        camera = new OrthographicCamera(1440, 2560);
-        viewport = new FitViewport(1440, 2560, camera);
-        shape = new ShapeRenderer();
 		initSprite();                                                                                   // Create texture, image and then spriteLogo
         initFont();                                                                                     // Creates freetype font and sets its properties
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
+
+        camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
+        viewport = new ScreenViewport(camera);
+        shape = new ShapeRenderer();
+
         Gdx.input.setInputProcessor(this);
 	}
 
 	@Override
 	public void render () {
-		setBackground();                                                                                // Sets background color
-//        collisionCheck();                                                                               // Ensures spriteLogo doesn't collide with window borders
-//        spriteLogo.setPosition(posX, posY);                                                             // Positions spriteLogo
-
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
+		setBackground();                                                                                // Sets background color
         batchProcess();
         shapeProcess();
 	}
@@ -85,19 +83,35 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 //        shape.rect(0, 300, WIN_WIDTH, WIN_HEIGHT);
 //        shape.end();
 
-        shape.setColor(Color.DARK_GRAY);
+        shape.setColor(Color.DARK_GRAY);    // Bottom-of-screen rectangle
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(0, 0, WIN_WIDTH, 300);
         shape.end();
 
-        shape.setColor(Color.BLUE);
+        shape.setColor(Color.YELLOW);
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(30, 30, 660, 240);
         shape.end();
 
+        shape.setColor(new Color(230f/255f, 230f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(WIN_WIDTH-690, 30, 660, 240);
         shape.end();
+
+
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                shape.setColor(Color.LIGHT_GRAY);
+                shape.begin(ShapeRenderer.ShapeType.Filled);
+                shape.rect(j*(WIN_WIDTH/8), i*(WIN_WIDTH/8)+300, WIN_WIDTH/8, WIN_WIDTH/8);
+                shape.end();
+
+                shape.setColor(Color.GRAY);
+                shape.begin(ShapeRenderer.ShapeType.Filled);
+                shape.rect(j*(WIN_WIDTH/8) + (WIN_WIDTH-WIN_WIDTH*.9f)/8/2, i*(WIN_WIDTH/8)+300 + (WIN_WIDTH-WIN_WIDTH*.9f)/8/2, (WIN_WIDTH/8)*.9f, (WIN_WIDTH/8)*.9f);
+                shape.end();
+            }
+        }
     }
 
     @Override
