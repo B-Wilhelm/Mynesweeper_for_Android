@@ -38,12 +38,15 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
     private String inputKey = "";
+    private int bombCount;
 	
 	@Override
 	public void create () {
 		initSprite();                                                                                   // Create texture, image and then spriteLogo
         initFont();                                                                                     // Creates freetype font and sets its properties
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
+
+        bombCount = 20;
 
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
@@ -71,7 +74,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private void batchProcess() {
         batch.begin();
             spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
-            font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);       // Draws alphanumeric char at top of screen
+//            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);       // Draws alphanumeric char at top of screen
+            font.draw(batch, bombCount + "", 0, 0);
         batch.end();
     }
 
@@ -197,8 +201,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         if(isRightTouchPressed) { scrollScale = 50f * amount; }
 
-        posX = posX - scrollScale/2;
-        posY = posY - scrollScale/2;
+        posX -= scrollScale/2;
+        posY -= scrollScale/2;
 
         spriteLogo.setSize(Math.max(spriteLogo.getWidth() + scrollScale, 1), Math.max(spriteLogo.getHeight() + scrollScale, 1));                            // Should scale image as scrolling occurs
 
