@@ -21,9 +21,10 @@ import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
-    private static final float BKGD_RED = 0f/255f;                                                         // Blue Background
-    private static final float BKGD_GREEN = 0f/255f;
-    private static final float BKGD_BLUE = 0f/255f;
+    private static final float BKGD_RED = 255f/255f;                                                         // Blue Background
+    private static final float BKGD_GREEN = 255f/255f;
+    private static final float BKGD_BLUE = 255f/255f;
+    private float sqSide = 0;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -71,44 +72,39 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         batch.begin();
             spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
             font.draw(batch, inputKey, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 20);       // Draws alphanumeric char at top of screen
-//            if(keypressArray.size() > 0){
-//                moveLogoArrowKeys(keypressArray.get(keypressArray.size()-1).getKeycode());                       // If key is pressed, spriteLogo is moved
-//            }
         batch.end();
     }
 
     private void shapeProcess() {
-//        shape.setColor(Color.GRAY);
-//        shape.begin(ShapeRenderer.ShapeType.Filled);
-//        shape.rect(0, 300, WIN_WIDTH, WIN_HEIGHT);
-//        shape.end();
+        shape.setColor(Color.DARK_GRAY);    // Top-of-screen rectangle
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.rect(0, 300+sqSide*8, WIN_WIDTH, WIN_HEIGHT-300-sqSide*8);
+        shape.end();
 
         shape.setColor(Color.DARK_GRAY);    // Bottom-of-screen rectangle
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(0, 0, WIN_WIDTH, 300);
         shape.end();
 
-        shape.setColor(Color.YELLOW);
+        shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(30, 30, 660, 240);
+        shape.rect(30, 30, WIN_WIDTH-60, 240);
         shape.end();
 
-        shape.setColor(new Color(230f/255f, 230f/255f, 0f, 0f));
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(WIN_WIDTH-690, 30, 660, 240);
-        shape.end();
+        float sqPos;
 
-
-        for(int i = 0; i < 8; i++){
+        for(int i = 0; i < 10; i++){
             for(int j = 0; j < 8; j++){
                 shape.setColor(Color.LIGHT_GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
-                shape.rect(j*(WIN_WIDTH/8), i*(WIN_WIDTH/8)+300, WIN_WIDTH/8, WIN_WIDTH/8);
+                sqPos = sqSide;
+                shape.rect(j*(sqPos), i*(sqPos)+300, sqSide, sqSide);
                 shape.end();
 
                 shape.setColor(Color.GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
-                shape.rect(j*(WIN_WIDTH/8) + (WIN_WIDTH-WIN_WIDTH*.9f)/8/2, i*(WIN_WIDTH/8)+300 + (WIN_WIDTH-WIN_WIDTH*.9f)/8/2, (WIN_WIDTH/8)*.9f, (WIN_WIDTH/8)*.9f);
+                sqPos = (WIN_WIDTH-WIN_WIDTH*.9f)/8/2;
+                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+300 + sqPos, sqSide*.9f, sqSide*.9f);
                 shape.end();
             }
         }
@@ -256,6 +252,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         WIN_WIDTH = Gdx.graphics.getWidth();
         posX = WIN_WIDTH/2-spriteLogo.getWidth()/2;
         posY = WIN_HEIGHT/2-spriteLogo.getHeight()/2;
+        sqSide = WIN_WIDTH/8;
     }
 
     private class buttonCheck extends Mynesweeper {
