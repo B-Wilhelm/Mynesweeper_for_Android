@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -32,7 +33,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private Texture img;
     private Sprite spriteLogo;
     private BitmapFont font;
-    private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                             // Used for smoothing out directional key movement
+    private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                                  // Used for smoothing out directional key movement
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
     private float posX, posY;
     private boolean isLeftTouchPressed = false;
@@ -50,6 +51,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
+//        viewport = new FitViewport(WIN_WIDTH, WIN_HEIGHT, camera);
         shape = new ShapeRenderer();
 
         Gdx.input.setInputProcessor(this);
@@ -74,7 +76,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private void batchProcess() {
         batch.begin();
             spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
-//            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);       // Draws alphanumeric char at top of screen
+            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);                                   // Draws alphanumeric char at top of screen
             font.draw(batch, bombCount + "", 0, 0);
         batch.end();
     }
