@@ -64,7 +64,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
-        toggleButton = new buttonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
+        initButtons();
 
         Gdx.input.setInputProcessor(this);
 	}
@@ -276,6 +276,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         spriteLogo = new Sprite(img);
         spriteLogo.setSize(spriteLogo.getWidth()/2, spriteLogo.getHeight()/2);
         spriteLogo.setAlpha(0f);
+    }
+
+    private void initButtons() {
+        toggleButton = new buttonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
     }
 
     private void initFont(){
