@@ -39,7 +39,9 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
     private String inputKey = "";
-    private int bombCount;
+    private int bombCount, secTimer;
+    private float timer;
+    private boolean timerCheck;
 	
 	@Override
 	public void create () {
@@ -48,10 +50,11 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
 
         bombCount = 20;
-
+        secTimer = 0;
+        timer = 0f;
+        timerCheck = true;
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
-//        viewport = new FitViewport(WIN_WIDTH, WIN_HEIGHT, camera);
         shape = new ShapeRenderer();
 
         Gdx.input.setInputProcessor(this);
@@ -62,9 +65,11 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
+        incrementTimer();
+        fontCheck();
 		setBackground();                                                                                // Sets background color
-        batchProcess();
         shapeProcess();
+        batchProcess();
 	}
 	
 	@Override
@@ -75,9 +80,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
 	private void batchProcess() {
         batch.begin();
-            spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
-            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);                                   // Draws alphanumeric char at top of screen
-            font.draw(batch, bombCount + "", 0, 0);
+//            spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
+//            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);                                   // Draws alphanumeric char at top of screen
+            font.draw(batch, bombCount + "", -WIN_WIDTH*6/13, WIN_HEIGHT*9/19);
+            font.draw(batch, secTimer + "", WIN_WIDTH*3/10, WIN_HEIGHT*9/19);
         batch.end();
     }
 
@@ -245,14 +251,19 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     }
 
     private void initFont(){
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/digital_7.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        param.size = 48;
-        param.borderWidth = 4;
+        param.size = (int)(42 * Gdx.graphics.getDensity());
+        param.color = Color.RED;
+        param.borderWidth = (int)(3 * Gdx.graphics.getDensity());
         param.borderColor = Color.BLACK;
         param.minFilter = Texture.TextureFilter.Linear;
         param.magFilter = Texture.TextureFilter.Linear;
         font = fontGen.generateFont(param);
+    }
+
+    private void fontCheck(){
+
     }
 
     private void storeWindowAndPosition(){
@@ -261,6 +272,14 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         posX = WIN_WIDTH/2-spriteLogo.getWidth()/2;
         posY = WIN_HEIGHT/2-spriteLogo.getHeight()/2;
         sqSide = WIN_WIDTH/8;
+    }
+
+    private void incrementTimer(){
+        if(timerCheck && timer < 1000) {
+            float deltaTime = Gdx.graphics.getDeltaTime();
+            timer += deltaTime;
+            secTimer = (int)timer;
+        }
     }
 
     private class buttonCheck extends Mynesweeper {
