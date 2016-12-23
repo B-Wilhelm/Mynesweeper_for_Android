@@ -22,6 +22,8 @@ import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
+    private static final int gridHeight = 11;
+    private static final int gridWidth = 8;
     private static final float BKGD_RED = 255f/255f;                                                         // Blue Background
     private static final float BKGD_GREEN = 255f/255f;
     private static final float BKGD_BLUE = 255f/255f;
@@ -107,8 +109,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         float sqPos;
 
-        for(int i = 0; i < 10; i++){
-            for(int j = 0; j < 8; j++){
+        for(int i = 0; i < gridHeight; i++){
+            for(int j = 0; j < gridWidth; j++){
                 shape.setColor(Color.LIGHT_GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
                 sqPos = sqSide;
