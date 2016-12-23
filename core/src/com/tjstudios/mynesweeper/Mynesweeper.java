@@ -9,11 +9,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -34,7 +34,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private SpriteBatch batch;                                                                          // Used for spriteLogo initialization
 	private Texture img;
     private Sprite spriteLogo;
-    private BitmapFont font;
+    private BitmapFont clockFont, ubuntuFont;
     private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                                  // Used for smoothing out directional key movement
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
     private float posX, posY;
@@ -44,6 +44,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private int bombCount, secTimer;
     private float timer;
     private boolean timerCheck;
+    private String toggleButtonText = "BOMB";
+    private float btmRectHeight;
+    private GlyphLayout layout = new GlyphLayout();
+    private button toggleButton;
 	
 	@Override
 	public void create () {
@@ -51,6 +55,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         initFont();                                                                                     // Creates freetype font and sets its properties
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
 
+        layout.setText(ubuntuFont, toggleButtonText);
+        btmRectHeight = WIN_HEIGHT/8;
         bombCount = 20;
         secTimer = 0;
         timer = 0f;
@@ -58,6 +64,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
+        toggleButton = new buttonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
 
         Gdx.input.setInputProcessor(this);
 	}
@@ -82,19 +89,21 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
 	private void batchProcess() {
         batch.begin();
-//            spriteLogo.draw(batch);                                                                     // Draws spriteLogo (Logo)
-//            font.draw(batch, inputKey, WIN_WIDTH/2, WIN_HEIGHT - 20);                                   // Draws alphanumeric char at top of screen
-            font.draw(batch, bombCount + "", -WIN_WIDTH*6/13, WIN_HEIGHT*9/19);
-            font.draw(batch, secTimer + "", WIN_WIDTH*3/10, WIN_HEIGHT*9/19);
+            clockFont.draw(batch, "Bombs:" + bombCount + "", -WIN_WIDTH*6/13, WIN_HEIGHT*15/32);
+            clockFont.draw(batch, "Time:" + secTimer + "", WIN_WIDTH/14, WIN_HEIGHT*15/32);
+            ubuntuFont.draw(batch, layout, -layout.width/2, -WIN_HEIGHT/2 + btmRectHeight/2 + layout.height/2);
         batch.end();
     }
 
     private void shapeProcess() {
-        float btmRectHeight = WIN_HEIGHT/8;
-
         shape.setColor(Color.DARK_GRAY);    // Top-of-screen rectangle
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(0, btmRectHeight+sqSide*8, WIN_WIDTH, WIN_HEIGHT-btmRectHeight-sqSide*8);
+        shape.rect(0, btmRectHeight+sqSide*gridHeight, WIN_WIDTH, WIN_HEIGHT-btmRectHeight-sqSide*gridHeight);
+        shape.end();
+
+        shape.setColor(Color.BLACK);
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.line(WIN_WIDTH/2, btmRectHeight+sqSide*gridHeight, WIN_WIDTH/2, WIN_HEIGHT);
         shape.end();
 
         shape.setColor(Color.DARK_GRAY);    // Bottom-of-screen rectangle
@@ -104,7 +113,7 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        roundedRect(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
+        roundedRect(toggleButton.getX(), toggleButton.getY(), toggleButton.getXSize(), toggleButton.getYSize(), ((buttonRounded)toggleButton).getRadius());
         shape.end();
 
         float sqPos;
@@ -278,7 +287,17 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         param.borderColor = Color.BLACK;
         param.minFilter = Texture.TextureFilter.Linear;
         param.magFilter = Texture.TextureFilter.Linear;
-        font = fontGen.generateFont(param);
+        clockFont = fontGen.generateFont(param);
+
+        fontGen = new FreeTypeFontGenerator(Gdx.files.internal("fonts/ubuntu_bold.ttf"));
+        param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        param.size = (int)(36 * Gdx.graphics.getDensity());
+        param.color = Color.BLACK;
+//        param.borderWidth = (int)(3 * Gdx.graphics.getDensity());
+//        param.borderColor = Color.BLACK;
+        param.minFilter = Texture.TextureFilter.Linear;
+        param.magFilter = Texture.TextureFilter.Linear;
+        ubuntuFont = fontGen.generateFont(param);
     }
 
     private void fontCheck(){
@@ -318,6 +337,107 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
             if(!(o instanceof buttonCheck)) return false;
             buttonCheck other = (buttonCheck) o;
             return (this.keycode == other.keycode && this.keypressArray == other.keypressArray);
+        }
+    }
+
+    private class button extends Mynesweeper {
+        private float xPos, yPos, xSize, ySize;
+        private float textX = 0, textY = 0;
+        private String text;
+
+        private button(float x, float y, float xSize, float ySize) {
+            xPos = x;
+            yPos = y;
+            this.xSize = xSize;
+            this.ySize = ySize;
+        }
+
+        private button(float x, float y, float xSize, float ySize, float xText, float yText, String theText) {
+            xPos = x;
+            yPos = y;
+            this.xSize = xSize;
+            this.ySize = ySize;
+            textX = xText;
+            textY = yText;
+            text = theText;
+        }
+
+        private float getX() {
+            return xPos;
+        }
+
+        private void setX(float x) {
+            xPos = x;
+        }
+
+        private float getY() {
+            return yPos;
+        }
+
+        private void setY(float y) {
+            yPos = y;
+        }
+
+        private float getXSize() {
+            return xSize;
+        }
+
+        private void setXSize(float x) {
+            xSize = x;
+        }
+
+        private float getYSize() {
+            return ySize;
+        }
+
+        private void setYSize(float y) {
+            ySize = y;
+        }
+
+        private float getXText() {
+            return textX;
+        }
+
+        private void setXText(float x) {
+            textX = x;
+        }
+
+        private float getYText() {
+            return textY;
+        }
+
+        private void setYText(float y) {
+            textY = y;
+        }
+
+        private String getText() {
+            return text;
+        }
+
+        private void setText(String s) {
+            text = s;
+        }
+    }
+
+    private class buttonRounded extends button {
+        private float radius;
+
+        private buttonRounded(float x, float y, float xSize, float ySize, float r) {
+            super(x, y, xSize, ySize);
+            radius = r;
+        }
+
+        private buttonRounded(float x, float y, float xSize, float ySize, float xText, float yText, String theText, float r) {
+            super(x, y, xSize, ySize, xText, yText, theText);
+            radius = r;
+        }
+
+        private float getRadius() {
+            return radius;
+        }
+
+        private void setRadius(float r) {
+            radius = r;
         }
     }
 }
