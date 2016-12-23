@@ -104,7 +104,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
-//        shape.rect(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10);
         roundedRect(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
         shape.end();
 
@@ -120,14 +119,14 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
                 shape.setColor(Color.GRAY);
                 shape.begin(ShapeRenderer.ShapeType.Filled);
-                sqPos = (WIN_WIDTH-WIN_WIDTH*.9f)/8/2;
-                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.9f, sqSide*.9f);
+                sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
+                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.88f, sqSide*.88f);
                 shape.end();
             }
         }
     }
 
-    public void roundedRect(float x, float y, float width, float height, float radius){
+    private void roundedRect(float x, float y, float width, float height, float radius){
         // Central rectangle
         shape.rect(x + radius, y + radius, width - 2*radius, height - 2*radius);
 
