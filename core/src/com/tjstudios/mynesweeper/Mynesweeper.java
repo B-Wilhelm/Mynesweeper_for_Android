@@ -104,7 +104,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
         shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(30, btmRectHeight/10, WIN_WIDTH-60, btmRectHeight*8/10);
+//        shape.rect(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10);
+        roundedRect(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
         shape.end();
 
         float sqPos;
@@ -124,6 +125,23 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
                 shape.end();
             }
         }
+    }
+
+    public void roundedRect(float x, float y, float width, float height, float radius){
+        // Central rectangle
+        shape.rect(x + radius, y + radius, width - 2*radius, height - 2*radius);
+
+        // Four side rectangles, in clockwise order
+        shape.rect(x + radius, y, width - 2*radius, radius);
+        shape.rect(x + width - radius, y + radius, radius, height - 2*radius);
+        shape.rect(x + radius, y + height - radius, width - 2*radius, radius);
+        shape.rect(x, y + radius, radius, height - 2*radius);
+
+        // Four arches, clockwise too
+        shape.arc(x + radius, y + radius, radius, 180f, 90f);
+        shape.arc(x + width - radius, y + radius, radius, 270f, 90f);
+        shape.arc(x + width - radius, y + height - radius, radius, 0f, 90f);
+        shape.arc(x + radius, y + height - radius, radius, 90f, 90f);
     }
 
     @Override
