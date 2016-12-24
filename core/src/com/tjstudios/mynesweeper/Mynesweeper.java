@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -42,12 +44,13 @@ public class Mynesweeper extends ApplicationAdapter {
     private int bombCount, secTimer;
     private float timer;
     private boolean timerCheck;
-    private String toggleButtonText;
     private float btmRectHeight, topRectHeight;
     private GlyphLayout timerLayout = new GlyphLayout();
     private GlyphLayout bombLayout = new GlyphLayout();
     private MyButton toggleButton;
     private Pixmap toggleButtonPixmap;
+    private String[] toggleButtonText;
+    private int toggleButtonIndex = 0;
 	
 	@Override
 	public void create () {
@@ -55,10 +58,9 @@ public class Mynesweeper extends ApplicationAdapter {
         initFont();                                                                                     // Creates freetype font and sets its properties
         initVars();
         initButtonValues();
+        initButtons();
 
         Gdx.input.setInputProcessor(stage);
-
-        initButtons();
 	}
 
 	@Override
@@ -168,6 +170,7 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void initVars(){
+        toggleButtonText = new String[]{"BOMB", "FLAG"};
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
@@ -175,7 +178,6 @@ public class Mynesweeper extends ApplicationAdapter {
         secTimer = 0;
         timer = 0f;
         timerCheck = true;
-        toggleButtonText = "BOMB";
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
@@ -202,8 +204,20 @@ public class Mynesweeper extends ApplicationAdapter {
         tBS.font = skin.getFont("default");
         skin.add("default", tBS);
 
-        final TextButton tB = new TextButton(toggleButtonText, skin);
+        final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], skin);
         tB.setPosition(toggleButton.getX(), toggleButton.getY());
+
+        tB.addListener(new EventListener()
+        {
+            @Override
+            public boolean handle(Event event)
+            {
+                toggleButtonIndex = Math.abs(toggleButtonIndex--);
+                tB.setText(toggleButtonText[toggleButtonIndex]);
+                return true;
+            }
+        });
+
         stage.addActor(tB);
     }
 
