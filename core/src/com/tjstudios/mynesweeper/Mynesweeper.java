@@ -195,7 +195,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private void initButtons() {
         skin = new Skin();
         toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
-        roundedRect(new Color(200f/255f, 200f/255f, 0, 1), 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)((MyButtonRounded)toggleButton).getRadius());
+        roundedRect(new Color(200f/255f, 200f/255f, 0, 1), 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
         skin.add("yellow", new Texture(toggleButtonPixmap));
         skin.add("default", ubuntuFont);
 
