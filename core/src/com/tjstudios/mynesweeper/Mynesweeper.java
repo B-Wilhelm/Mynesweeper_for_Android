@@ -17,10 +17,12 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -207,14 +209,13 @@ public class Mynesweeper extends ApplicationAdapter {
         final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], skin);
         tB.setPosition(toggleButton.getX(), toggleButton.getY());
 
-        tB.addListener(new EventListener()
+        tB.addListener(new ClickListener()
         {
             @Override
-            public boolean handle(Event event)
+            public void clicked(InputEvent event, float x, float y)
             {
-                toggleButtonIndex = Math.abs(toggleButtonIndex--);
+                toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
                 tB.setText(toggleButtonText[toggleButtonIndex]);
-                return true;
             }
         });
 
