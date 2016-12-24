@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -14,6 +15,10 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -35,9 +40,12 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	private Texture img;
     private Sprite spriteLogo;
     private BitmapFont clockFont, ubuntuFont;
+    private Stage stage;
+    private Skin skin;
+    private Table table;
     private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                                  // Used for smoothing out directional key movement
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
-    private float posX, posY;
+    private float posX = 0, posY = 0;
     private boolean isLeftTouchPressed = false;
     private boolean isRightTouchPressed = false;
     private String inputKey = "";
@@ -51,9 +59,11 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 	
 	@Override
 	public void create () {
-		initSprite();                                                                                   // Create texture, image and then spriteLogo
-        initFont();                                                                                     // Creates freetype font and sets its properties
+        Pixmap pixmap;
+
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
+        initSprite();                                                                                   // Create texture, image and then spriteLogo
+        initFont();                                                                                     // Creates freetype font and sets its properties
 
         layout.setText(ubuntuFont, toggleButtonText);
         btmRectHeight = WIN_HEIGHT/8;
@@ -64,9 +74,31 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
+        stage = new Stage();
+
+        Gdx.input.setInputProcessor(stage);
+
         initButtons();
 
-        Gdx.input.setInputProcessor(this);
+        skin = new Skin();
+        pixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
+        pixmap.setColor(200f/255f, 200f/255f, 0, 1);
+        pixmap.fill();
+        skin.add("yellow", new Texture(pixmap));
+        skin.add("default", ubuntuFont);
+
+        TextButton.TextButtonStyle tBS = new TextButton.TextButtonStyle();
+        tBS.up = skin.newDrawable("yellow", 200f/255f, 200f/255f, 0, 1);
+        tBS.down = skin.newDrawable("yellow", 179f/255f, 179f/255f, 0, 1);
+//        tBS.checked = skin.newDrawable("yellow", Color.DARK_GRAY);
+        tBS.over = skin.newDrawable("yellow", Color.LIGHT_GRAY);
+        tBS.font = skin.getFont("default");
+        skin.add("default", tBS);
+
+        final TextButton tB = new TextButton("BOMB", skin);
+        tB.setPosition(toggleButton.getX(), toggleButton.getY());
+        stage.addActor(tB);
+//        stage.setDebugAll(true);
 	}
 
 	@Override
@@ -79,19 +111,22 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 		setBackground();                                                                                // Sets background color
         shapeProcess();
         batchProcess();
+        stage.act();
+        stage.draw();
 	}
 	
 	@Override
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+        stage.dispose();
+        skin.dispose();
 	}
 
 	private void batchProcess() {
         batch.begin();
             clockFont.draw(batch, "Bombs:" + bombCount + "", -WIN_WIDTH*6/13, WIN_HEIGHT*15/32);
             clockFont.draw(batch, "Time:" + secTimer + "", WIN_WIDTH/14, WIN_HEIGHT*15/32);
-            ubuntuFont.draw(batch, layout, -layout.width/2, -WIN_HEIGHT/2 + btmRectHeight/2 + layout.height/2);
         batch.end();
     }
 
@@ -111,10 +146,10 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
 
-        shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        roundedRect(toggleButton.getX(), toggleButton.getY(), toggleButton.getXSize(), toggleButton.getYSize(), ((buttonRounded)toggleButton).getRadius());
-        shape.end();
+//        shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
+//        shape.begin(ShapeRenderer.ShapeType.Filled);
+//        roundedRect(toggleButton.getX(), toggleButton.getY(), toggleButton.getXSize(), toggleButton.getYSize(), ((buttonRounded)toggleButton).getRadius());
+//        shape.end();
 
         float sqPos;
 
@@ -311,8 +346,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     private void storeWindowAndPosition(){
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
-        posX = WIN_WIDTH/2-spriteLogo.getWidth()/2;
-        posY = WIN_HEIGHT/2-spriteLogo.getHeight()/2;
         sqSide = WIN_WIDTH/8;
     }
 
