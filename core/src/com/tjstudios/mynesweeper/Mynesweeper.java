@@ -26,79 +26,39 @@ import java.util.ArrayList;
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Character.toUpperCase;
 
-public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
+public class Mynesweeper extends ApplicationAdapter {
     private static final int gridHeight = 11;
     private static final int gridWidth = 8;
-    private static final float BKGD_RED = 255f/255f;                                                         // Blue Background
-    private static final float BKGD_GREEN = 255f/255f;
-    private static final float BKGD_BLUE = 255f/255f;
     private float sqSide = 0;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
 	private SpriteBatch batch;                                                                          // Used for spriteLogo initialization
 	private Texture img;
-    private Sprite spriteLogo;
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
     private Skin skin;
-    private Table table;
-    private ArrayList<buttonCheck> keypressArray = new ArrayList<buttonCheck>();                                  // Used for smoothing out directional key movement
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
-    private float posX = 0, posY = 0;
-    private boolean isLeftTouchPressed = false;
-    private boolean isRightTouchPressed = false;
-    private String inputKey = "";
     private int bombCount, secTimer;
     private float timer;
     private boolean timerCheck;
-    private String toggleButtonText = "BOMB";
-    private float btmRectHeight;
-    private GlyphLayout layout = new GlyphLayout();
-    private button toggleButton;
+    private String toggleButtonText;
+    private float btmRectHeight, topRectHeight;
+    private GlyphLayout timerLayout = new GlyphLayout();
+    private GlyphLayout bombLayout = new GlyphLayout();
+    private MyButton toggleButton;
+    private Pixmap toggleButtonPixmap;
 	
 	@Override
 	public void create () {
-        Pixmap pixmap;
-
         storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
-        initSprite();                                                                                   // Create texture, image and then spriteLogo
         initFont();                                                                                     // Creates freetype font and sets its properties
-
-        layout.setText(ubuntuFont, toggleButtonText);
-        btmRectHeight = WIN_HEIGHT/8;
-        bombCount = 20;
-        secTimer = 0;
-        timer = 0f;
-        timerCheck = true;
-        camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
-        viewport = new ScreenViewport(camera);
-        shape = new ShapeRenderer();
-        stage = new Stage();
+        initVars();
+        initButtonValues();
 
         Gdx.input.setInputProcessor(stage);
 
         initButtons();
-
-        skin = new Skin();
-        pixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
-        pixmap.setColor(200f/255f, 200f/255f, 0, 1);
-        pixmap.fill();
-        skin.add("yellow", new Texture(pixmap));
-        skin.add("default", ubuntuFont);
-
-        TextButton.TextButtonStyle tBS = new TextButton.TextButtonStyle();
-        tBS.up = skin.newDrawable("yellow", 200f/255f, 200f/255f, 0, 1);
-        tBS.down = skin.newDrawable("yellow", 179f/255f, 179f/255f, 0, 1);
-//        tBS.checked = skin.newDrawable("yellow", Color.DARK_GRAY);
-        tBS.over = skin.newDrawable("yellow", Color.LIGHT_GRAY);
-        tBS.font = skin.getFont("default");
-        skin.add("default", tBS);
-
-        final TextButton tB = new TextButton("BOMB", skin);
-        tB.setPosition(toggleButton.getX(), toggleButton.getY());
-        stage.addActor(tB);
-//        stage.setDebugAll(true);
 	}
 
 	@Override
@@ -106,13 +66,14 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
+        bombLayout.setText(clockFont, "Bombs:" + bombCount);
+        timerLayout.setText(clockFont, "Time:" + secTimer);
+
         incrementTimer();
-        fontCheck();
 		setBackground();                                                                                // Sets background color
         shapeProcess();
         batchProcess();
-        stage.act();
-        stage.draw();
+        stageProcess();
 	}
 	
 	@Override
@@ -125,8 +86,8 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
 
 	private void batchProcess() {
         batch.begin();
-            clockFont.draw(batch, "Bombs:" + bombCount + "", -WIN_WIDTH*6/13, WIN_HEIGHT*15/32);
-            clockFont.draw(batch, "Time:" + secTimer + "", WIN_WIDTH/14, WIN_HEIGHT*15/32);
+            clockFont.draw(batch, bombLayout, -WIN_WIDTH/4 - bombLayout.width/2, (WIN_HEIGHT-topRectHeight+bombLayout.height)/2);
+            clockFont.draw(batch, timerLayout, WIN_WIDTH/4 - timerLayout.width/2, (WIN_HEIGHT-topRectHeight+timerLayout.height)/2);
         batch.end();
     }
 
@@ -145,11 +106,6 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
-
-//        shape.setColor(new Color(200f/255f, 200f/255f, 0f, 0f));
-//        shape.begin(ShapeRenderer.ShapeType.Filled);
-//        roundedRect(toggleButton.getX(), toggleButton.getY(), toggleButton.getXSize(), toggleButton.getYSize(), ((buttonRounded)toggleButton).getRadius());
-//        shape.end();
 
         float sqPos;
 
@@ -170,21 +126,27 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private void roundedRect(float x, float y, float width, float height, float radius){
+    private void stageProcess(){
+        stage.act();
+        stage.draw();
+    }
+
+    private void roundedRect(Color c, int x, int y, int width, int height, int radius){
         // Central rectangle
-        shape.rect(x + radius, y + radius, width - 2*radius, height - 2*radius);
+        toggleButtonPixmap.setColor(c);
+        toggleButtonPixmap.fillRectangle(x + radius, y + radius, width - 2*radius, height - 2*radius);
 
         // Four side rectangles, in clockwise order
-        shape.rect(x + radius, y, width - 2*radius, radius);
-        shape.rect(x + width - radius, y + radius, radius, height - 2*radius);
-        shape.rect(x + radius, y + height - radius, width - 2*radius, radius);
-        shape.rect(x, y + radius, radius, height - 2*radius);
+        toggleButtonPixmap.fillRectangle(x + radius, y, width - 2*radius, radius);
+        toggleButtonPixmap.fillRectangle(x + width - radius, y + radius, radius, height - 2*radius);
+        toggleButtonPixmap.fillRectangle(x + radius, y + height - radius, width - 2*radius, radius);
+        toggleButtonPixmap.fillRectangle(x, y + radius, radius, height - 2*radius);
 
         // Four arches, clockwise too
-        shape.arc(x + radius, y + radius, radius, 180f, 90f);
-        shape.arc(x + width - radius, y + radius, radius, 270f, 90f);
-        shape.arc(x + width - radius, y + height - radius, radius, 0f, 90f);
-        shape.arc(x + radius, y + height - radius, radius, 90f, 90f);
+        toggleButtonPixmap.fillCircle(x + radius, y + radius, radius);
+        toggleButtonPixmap.fillCircle(x + width - radius, y + radius, radius);
+        toggleButtonPixmap.fillCircle(x + width - radius, y + height - radius, radius);
+        toggleButtonPixmap.fillCircle(x + radius, y + height - radius, radius);
     }
 
     @Override
@@ -200,121 +162,49 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
     public void resume() {
     }
 
-	@Override
-	public boolean keyDown(int keycode) {
-        if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP){
-            keypressArray.add(new buttonCheck(keycode, true));
-        }
-
-		return true;
-	}
-
-    @Override
-    public boolean keyUp(int keycode) {
-        if(keycode == Input.Keys.LEFT || keycode == Input.Keys.RIGHT || keycode == Input.Keys.DOWN || keycode == Input.Keys.UP) {
-            keypressArray.remove(keypressArray.indexOf(new buttonCheck(keycode, true)));
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean keyTyped(char c) {
-        if(isLetterOrDigit(c)){
-            inputKey = toUpperCase(c) + "";
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if(button == Input.Buttons.LEFT){
-            posX = screenX - spriteLogo.getWidth()/2;
-            posY = Gdx.graphics.getHeight() - screenY - spriteLogo.getHeight()/2;
-            isLeftTouchPressed = true;
-        }
-        if(button == Input.Buttons.RIGHT){
-            posX = Gdx.graphics.getWidth()/2 - spriteLogo.getWidth()/2;
-            posY = Gdx.graphics.getHeight()/2 - spriteLogo.getHeight()/2;
-            isRightTouchPressed = true;
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        isLeftTouchPressed = false;
-        isRightTouchPressed = false;
-
-        return true;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if(isLeftTouchPressed) {
-            posX = screenX - spriteLogo.getWidth() / 2;
-            posY = Gdx.graphics.getHeight() - screenY - spriteLogo.getHeight() / 2;
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        float scrollScale = 5f * amount;
-
-        if(isRightTouchPressed) { scrollScale = 50f * amount; }
-
-        posX -= scrollScale/2;
-        posY -= scrollScale/2;
-
-        spriteLogo.setSize(Math.max(spriteLogo.getWidth() + scrollScale, 1), Math.max(spriteLogo.getHeight() + scrollScale, 1));                            // Should scale image as scrolling occurs
-
-        return true;
-    }
-
-    private void moveLogoArrowKeys(int keycode){
-        float moveAmount = 8.0f;
-
-        if(keycode == Input.Keys.LEFT)
-            posX-=moveAmount;
-        if(keycode == Input.Keys.RIGHT)
-            posX+=moveAmount;
-        if(keycode == Input.Keys.DOWN)
-            posY-=moveAmount;
-        if(keycode == Input.Keys.UP)
-            posY+=moveAmount;
-    }
-
-    private void collisionCheck(){
-        posX = Math.min(posX, WIN_WIDTH - spriteLogo.getWidth());                                           // Ensures spriteLogo doesn't leave bounds of window
-        posY = Math.min(posY, WIN_HEIGHT - spriteLogo.getHeight());
-        posX = Math.max(posX, 0);
-        posY = Math.max(posY, 0);
-    }
-
     private void setBackground(){
-        Gdx.gl.glClearColor(BKGD_RED, BKGD_GREEN, BKGD_BLUE, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
 
-    private void initSprite(){
+    private void initVars(){
+        sqSide = WIN_WIDTH/8;
+        btmRectHeight = WIN_HEIGHT/8;
+        topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
+        bombCount = 20;
+        secTimer = 0;
+        timer = 0f;
+        timerCheck = true;
+        toggleButtonText = "BOMB";
+        camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
+        viewport = new ScreenViewport(camera);
+        shape = new ShapeRenderer();
+        stage = new Stage();
         batch = new SpriteBatch();
         img = new Texture("minesweep.png");
-        spriteLogo = new Sprite(img);
-        spriteLogo.setSize(spriteLogo.getWidth()/2, spriteLogo.getHeight()/2);
-        spriteLogo.setAlpha(0f);
+    }
+
+    private void initButtonValues() {
+        toggleButton = new MyButtonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 10f);
     }
 
     private void initButtons() {
-        toggleButton = new buttonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 5f);
+        skin = new Skin();
+        toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
+        roundedRect(new Color(200f/255f, 200f/255f, 0, 1), 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)((MyButtonRounded)toggleButton).getRadius());
+        skin.add("yellow", new Texture(toggleButtonPixmap));
+        skin.add("default", ubuntuFont);
+
+        TextButton.TextButtonStyle tBS = new TextButton.TextButtonStyle();
+        tBS.up = skin.newDrawable("yellow", 200f/255f, 200f/255f, 0, 1);
+        tBS.down = skin.newDrawable("yellow", 179f/255f, 179f/255f, 0, 1);
+        tBS.over = skin.newDrawable("yellow", Color.LIGHT_GRAY);
+        tBS.font = skin.getFont("default");
+        skin.add("default", tBS);
+
+        final TextButton tB = new TextButton(toggleButtonText, skin);
+        tB.setPosition(toggleButton.getX(), toggleButton.getY());
+        stage.addActor(tB);
     }
 
     private void initFont(){
@@ -332,21 +222,14 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         param = new FreeTypeFontGenerator.FreeTypeFontParameter();
         param.size = (int)(36 * Gdx.graphics.getDensity());
         param.color = Color.BLACK;
-//        param.borderWidth = (int)(3 * Gdx.graphics.getDensity());
-//        param.borderColor = Color.BLACK;
         param.minFilter = Texture.TextureFilter.Linear;
         param.magFilter = Texture.TextureFilter.Linear;
         ubuntuFont = fontGen.generateFont(param);
     }
 
-    private void fontCheck(){
-
-    }
-
     private void storeWindowAndPosition(){
         WIN_HEIGHT = Gdx.graphics.getHeight();
         WIN_WIDTH = Gdx.graphics.getWidth();
-        sqSide = WIN_WIDTH/8;
     }
 
     private void incrementTimer(){
@@ -357,39 +240,19 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private class buttonCheck extends Mynesweeper {
-        private int keycode;
-        private boolean keypressArray;
-
-        private buttonCheck(int key, boolean press) {
-            keycode = key;
-            keypressArray = press;
-        }
-
-        private int getKeycode(){
-            return keycode;
-        }
-
-        public boolean equals(Object o) {
-            if(!(o instanceof buttonCheck)) return false;
-            buttonCheck other = (buttonCheck) o;
-            return (this.keycode == other.keycode && this.keypressArray == other.keypressArray);
-        }
-    }
-
-    private class button extends Mynesweeper {
+    private class MyButton extends Mynesweeper {
         private float xPos, yPos, xSize, ySize;
         private float textX = 0, textY = 0;
         private String text;
 
-        private button(float x, float y, float xSize, float ySize) {
+        private MyButton(float x, float y, float xSize, float ySize) {
             xPos = x;
             yPos = y;
             this.xSize = xSize;
             this.ySize = ySize;
         }
 
-        private button(float x, float y, float xSize, float ySize, float xText, float yText, String theText) {
+        private MyButton(float x, float y, float xSize, float ySize, float xText, float yText, String theText) {
             xPos = x;
             yPos = y;
             this.xSize = xSize;
@@ -456,15 +319,15 @@ public class Mynesweeper extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private class buttonRounded extends button {
+    private class MyButtonRounded extends MyButton {
         private float radius;
 
-        private buttonRounded(float x, float y, float xSize, float ySize, float r) {
+        private MyButtonRounded(float x, float y, float xSize, float ySize, float r) {
             super(x, y, xSize, ySize);
             radius = r;
         }
 
-        private buttonRounded(float x, float y, float xSize, float ySize, float xText, float yText, String theText, float r) {
+        private MyButtonRounded(float x, float y, float xSize, float ySize, float xText, float yText, String theText, float r) {
             super(x, y, xSize, ySize, xText, yText, theText);
             radius = r;
         }
