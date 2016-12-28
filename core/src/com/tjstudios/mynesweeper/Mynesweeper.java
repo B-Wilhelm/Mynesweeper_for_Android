@@ -2,8 +2,6 @@ package com.tjstudios.mynesweeper;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,53 +9,51 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
-import static java.lang.Character.isLetterOrDigit;
-import static java.lang.Character.toUpperCase;
 
 public class Mynesweeper extends ApplicationAdapter {
     private static final int gridHeight = 11;
     private static final int gridWidth = 8;
+    private float MINE_X_SIZE, MINE_Y_SIZE;
+    private String[] mineStatus;
     private float sqSide = 0;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
-	private SpriteBatch batch;                                                                          // Used for spriteLogo initialization
+	private SpriteBatch batch;                                                                              // Used for spriteLogo initialization
 	private Texture img;
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
-    private Skin skin;
+    private Skin toggleSkin, mineSkin;
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
     private int bombCount, secTimer;
     private float timer;
     private boolean timerCheck;
     private float btmRectHeight, topRectHeight;
-    private GlyphLayout timerLayout = new GlyphLayout();
-    private GlyphLayout bombLayout = new GlyphLayout();
+    private GlyphLayout timerLayout = new GlyphLayout(), bombLayout = new GlyphLayout();
     private MyButton toggleButton;
-    private Pixmap toggleButtonPixmap;
     private String[] toggleButtonText;
     private int toggleButtonIndex = 0;
+    private Color toggleButtonColor = new Color(200f / 255f, 200f / 255f, 0, 1), toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1), toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
+    private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1), mineColorClicked = new Color(131f/255f, 131f/255f, 131f/255f, 1);
+    private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
+    private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
 	
 	@Override
 	public void create () {
-        storeWindowAndPosition();                                                                       // Stores window size and position into their own variables
-        initFont();                                                                                     // Creates freetype font and sets its properties
+        storeWindowAndPosition();                                                                   // Stores window size and position into their own variables
+        initFont();                                                                                 // Creates freetype font and sets its properties
         initVars();
         initButtonValues();
         initButtons();
@@ -85,7 +81,7 @@ public class Mynesweeper extends ApplicationAdapter {
 		batch.dispose();
 		img.dispose();
         stage.dispose();
-        skin.dispose();
+        mineSkin.dispose();
 	}
 
 	private void batchProcess() {
@@ -115,17 +111,17 @@ public class Mynesweeper extends ApplicationAdapter {
 
         for(int i = 0; i < gridHeight; i++){
             for(int j = 0; j < gridWidth; j++){
-                shape.setColor(Color.LIGHT_GRAY);
-                shape.begin(ShapeRenderer.ShapeType.Filled);
-                sqPos = sqSide;
-                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
-                shape.end();
+//                shape.setColor(Color.LIGHT_GRAY);
+//                shape.begin(ShapeRenderer.ShapeType.Filled);
+//                sqPos = sqSide;
+//                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
+//                shape.end();
 
-                shape.setColor(Color.GRAY);
-                shape.begin(ShapeRenderer.ShapeType.Filled);
-                sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
-                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.88f, sqSide*.88f);
-                shape.end();
+//                shape.setColor(Color.GRAY);
+//                shape.begin(ShapeRenderer.ShapeType.Filled);
+//                sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
+//                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.88f, sqSide*.88f);
+//                shape.end();
             }
         }
     }
@@ -135,7 +131,7 @@ public class Mynesweeper extends ApplicationAdapter {
         stage.draw();
     }
 
-    private void roundedRect(Color c, int x, int y, int width, int height, int radius){
+    private void roundedRect(Pixmap toggleButtonPixmap, Color c, int x, int y, int width, int height, int radius){
         // Central rectangle
         toggleButtonPixmap.setColor(c);
         toggleButtonPixmap.fillRectangle(x + radius, y + radius, width - 2*radius, height - 2*radius);
@@ -172,6 +168,7 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void initVars(){
+        mineStatus = new String[]{" ", "1", "2", "3", "4", "5", "6", "7", "8", "BOMB"};             // 0 is blank, 9 is bomb and 1-8 are adjacent bomb counts
         toggleButtonText = new String[]{"BOMB", "FLAG"};
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
@@ -186,40 +183,88 @@ public class Mynesweeper extends ApplicationAdapter {
         stage = new Stage();
         batch = new SpriteBatch();
         img = new Texture("minesweep.png");
+        MINE_X_SIZE = MINE_Y_SIZE = sqSide*.88f;
     }
 
     private void initButtonValues() {
         toggleButton = new MyButtonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 10f);
+        float sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
+
+        for(int i = 0; i < gridHeight; i++) {
+            for(int j = 0; j < gridWidth; j++) {
+                mineFieldValues.add(new MineButton(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.88f, sqSide*.88f, mineStatus[9], j, i, false));
+            }
+        }
     }
 
     private void initButtons() {
-        skin = new Skin();
-        toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
-        roundedRect(new Color(200f/255f, 200f/255f, 0, 1), 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
-        skin.add("yellow", new Texture(toggleButtonPixmap));
-        skin.add("default", ubuntuFont);
+        toggleSkin = new Skin();
+        Pixmap toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
+        roundedRect(toggleButtonPixmap, toggleButtonColor, 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
+        toggleSkin.add("yellow", new Texture(toggleButtonPixmap));
+        toggleSkin.add("default", ubuntuFont);
 
-        TextButton.TextButtonStyle tBS = new TextButton.TextButtonStyle();
-        tBS.up = skin.newDrawable("yellow", 200f/255f, 200f/255f, 0, 1);
-        tBS.down = skin.newDrawable("yellow", 179f/255f, 179f/255f, 0, 1);
-        tBS.over = skin.newDrawable("yellow", Color.LIGHT_GRAY);
-        tBS.font = skin.getFont("default");
-        skin.add("default", tBS);
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.up = toggleSkin.newDrawable("yellow", toggleButtonColor);
+        style.down = toggleSkin.newDrawable("yellow", toggleButtonShaded);
+        style.over = toggleSkin.newDrawable("yellow", toggleButtonClicked);
+        style.font = toggleSkin.getFont("default");
+        toggleSkin.add("default", style);
 
-        final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], skin);
+        final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], toggleSkin);
         tB.setPosition(toggleButton.getX(), toggleButton.getY());
 
-        tB.addListener(new ClickListener()
+        tB.addListener(new InputListener()
         {
             @Override
-            public void clicked(InputEvent event, float x, float y)
-            {
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
                 toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
                 tB.setText(toggleButtonText[toggleButtonIndex]);
+
+                return true;
+            }
+
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+
             }
         });
-
         stage.addActor(tB);
+
+        /*----------------------------------------------------------------------------------------*/
+
+        mineSkin = new Skin();
+        Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
+        mineSkin.add("gray", new Texture(minePix));
+        mineSkin.add("default", ubuntuFont);
+
+        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
+        mineStyle.up = mineSkin.newDrawable("gray", mineColor);
+        mineStyle.down = mineSkin.newDrawable("gray", mineColorShaded);
+        mineStyle.font = mineSkin.getFont("default");
+        mineSkin.add("default", mineStyle);
+
+        for(int i = 0; i < mineFieldValues.size(); i++) {
+            minePix.setColor(mineColor);
+            minePix.drawRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
+
+            final TextButton temp = new TextButton("0", mineSkin);
+            temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
+            System.out.println((int)mineFieldValues.get(i).getX());
+            temp.addListener(new InputListener() {
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    return false;
+                }
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+//                    mineFieldValues.get(i*j).setRevealed(true);
+                }
+            });
+
+            mineField.add(temp);
+            stage.addActor(temp);
+            }
+
     }
 
     private void initFont(){
@@ -257,7 +302,6 @@ public class Mynesweeper extends ApplicationAdapter {
 
     private class MyButton extends Mynesweeper {
         private float xPos, yPos, xSize, ySize;
-        private float textX = 0, textY = 0;
         private String text;
 
         private MyButton(float x, float y, float xSize, float ySize) {
@@ -267,17 +311,15 @@ public class Mynesweeper extends ApplicationAdapter {
             this.ySize = ySize;
         }
 
-        private MyButton(float x, float y, float xSize, float ySize, float xText, float yText, String theText) {
+        private MyButton(float x, float y, float xSize, float ySize, String theText) {
             xPos = x;
             yPos = y;
             this.xSize = xSize;
             this.ySize = ySize;
-            textX = xText;
-            textY = yText;
             text = theText;
         }
 
-        private float getX() {
+        public float getX() {
             return xPos;
         }
 
@@ -285,7 +327,7 @@ public class Mynesweeper extends ApplicationAdapter {
             xPos = x;
         }
 
-        private float getY() {
+        public float getY() {
             return yPos;
         }
 
@@ -309,22 +351,6 @@ public class Mynesweeper extends ApplicationAdapter {
             ySize = y;
         }
 
-        private float getXText() {
-            return textX;
-        }
-
-        private void setXText(float x) {
-            textX = x;
-        }
-
-        private float getYText() {
-            return textY;
-        }
-
-        private void setYText(float y) {
-            textY = y;
-        }
-
         private String getText() {
             return text;
         }
@@ -342,17 +368,49 @@ public class Mynesweeper extends ApplicationAdapter {
             radius = r;
         }
 
-        private MyButtonRounded(float x, float y, float xSize, float ySize, float xText, float yText, String theText, float r) {
-            super(x, y, xSize, ySize, xText, yText, theText);
+        private MyButtonRounded(float x, float y, float xSize, float ySize, String theText, float r) {
+            super(x, y, xSize, ySize, theText);
             radius = r;
         }
 
-        private float getRadius() {
+        public float getRadius() {
             return radius;
         }
 
         private void setRadius(float r) {
             radius = r;
         }
+    }
+
+    private class MineButton extends MyButton {
+        private int xMinePos, yMinePos;
+        private boolean revealed;
+
+        private MineButton(float x, float y, float xSize, float ySize, String text, int xMinePos, int yMinePos, boolean revealed) {
+            super(x, y, xSize, ySize, text);
+            this.revealed = revealed;
+            this.xMinePos = xMinePos;
+            this.yMinePos = yMinePos;
+        }
+
+        public int getXMinePos() {
+            return xMinePos;
+        }
+
+        private void setXMinePos(int x) {
+            xMinePos = x;
+        }
+
+        public int getYMinePos() {
+            return yMinePos;
+        }
+
+        private void setYMinePos(int y) {
+            yMinePos = y;
+        }
+
+        private boolean getRevealed() {return revealed;}
+
+        private void setRevealed(boolean revealed) {this.revealed = revealed;}
     }
 }
