@@ -109,16 +109,6 @@ public class Mynesweeper extends ApplicationAdapter {
         shape.begin(ShapeRenderer.ShapeType.Filled);
         shape.rect(0, btmRectHeight, WIN_WIDTH, gridHeight * sqSide);
         shape.end();
-
-//        for(int i = 0; i < gridHeight; i++){
-//            for(int j = 0; j < gridWidth; j++){
-//                shape.setColor(Color.LIGHT_GRAY);
-//                shape.begin(ShapeRenderer.ShapeType.Filled);
-//                sqPos = sqSide;
-//                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
-//                shape.end();
-//            }
-//        }
     }
 
     private void stageProcess(){
@@ -171,7 +161,7 @@ public class Mynesweeper extends ApplicationAdapter {
         bombCount = 20;
         secTimer = 0;
         timer = 0f;
-        timerCheck = true;
+        timerCheck = false;
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
@@ -250,6 +240,8 @@ public class Mynesweeper extends ApplicationAdapter {
                 }
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    if(!timerCheck) { timerCheck = true; }
+
                     temp.setText("0");
 //                    mineFieldValues.get(i*j).setRevealed(true);
                 }
