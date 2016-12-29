@@ -192,6 +192,7 @@ public class Mynesweeper extends ApplicationAdapter {
         Pixmap toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
         roundedRect(toggleButtonPixmap, toggleButtonColor, 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
         toggleSkin.add("yellow", new Texture(toggleButtonPixmap));
+        toggleButtonPixmap.dispose();
         toggleSkin.add("default", ubuntuFont);
 
         TextButton.TextButtonStyle toggleStyle = new TextButton.TextButtonStyle();
@@ -218,24 +219,24 @@ public class Mynesweeper extends ApplicationAdapter {
 
         /*----------------------------------------------------------------------------------------*/
 
-        toggleSkin = new Skin();
+        Skin mineSkin = new Skin();
         Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
-        toggleSkin.add("yellow", new Texture(minePix));
-        toggleSkin.add("default", ubuntuFont);
-
-        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
-        mineStyle.up = toggleSkin.newDrawable("yellow", mineColor);
-        mineStyle.down = toggleSkin.newDrawable("yellow", mineColorShaded);
-        mineStyle.over = toggleSkin.newDrawable("yellow", mineColorShaded);
-        mineStyle.font = toggleSkin.getFont("default");
-        toggleSkin.add("default", mineStyle);
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
             minePix.setColor(mineColor);
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
+            mineSkin.add("gray", new Texture(minePix));
+            mineSkin.add("default", ubuntuFont);
 
-            final TextButton temp = new TextButton("B", toggleSkin);
+            TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
+            mineStyle.up = mineSkin.newDrawable("gray", mineColor);
+            mineStyle.down = mineSkin.newDrawable("gray", mineColorShaded);
+            mineStyle.font = mineSkin.getFont("default");
+            mineSkin.add("default", mineStyle);
+
+            final TextButton temp = new TextButton("B", mineSkin);
             temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
+
             temp.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -251,8 +252,6 @@ public class Mynesweeper extends ApplicationAdapter {
             mineField.add(temp);
             stage.addActor(temp);
         }
-
-        stage.setDebugAll(true);
     }
 
     private void initFont(){
