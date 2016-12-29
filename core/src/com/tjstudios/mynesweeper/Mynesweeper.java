@@ -95,14 +95,13 @@ public class Mynesweeper extends ApplicationAdapter {
         shape.rect(0, btmRectHeight+sqSide*gridHeight, WIN_WIDTH, WIN_HEIGHT-btmRectHeight-sqSide*gridHeight);
         shape.end();
 
+        shape.begin(ShapeRenderer.ShapeType.Filled);    // Bottom-of-screen rectangle
+        shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
+        shape.end();
+
         shape.setColor(Color.BLACK);
         shape.begin(ShapeRenderer.ShapeType.Line);
         shape.line(WIN_WIDTH/2, btmRectHeight+sqSide*gridHeight, WIN_WIDTH/2, WIN_HEIGHT);
-        shape.end();
-
-        shape.setColor(Color.DARK_GRAY);    // Bottom-of-screen rectangle
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
 
         shape.setColor(Color.LIGHT_GRAY);
@@ -217,8 +216,11 @@ public class Mynesweeper extends ApplicationAdapter {
         Skin mineSkin = new Skin();
         Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
         TextButton.TextButtonStyle mineStyle;
+        CurrentEvents event;
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
+            events = new CurrentEvents(i);
+
             minePix.setColor(mineColor);
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("gray", new Texture(minePix));
@@ -243,7 +245,7 @@ public class Mynesweeper extends ApplicationAdapter {
                     if(!timerCheck) { timerCheck = true; }
 
                     temp.setText("0");
-//                    mineFieldValues.get(i*j).setRevealed(true);
+                    mineFieldValues.get().setRevealed(true);
                 }
             });
 
@@ -397,5 +399,35 @@ public class Mynesweeper extends ApplicationAdapter {
         private boolean getRevealed() {return revealed;}
 
         private void setRevealed(boolean revealed) {this.revealed = revealed;}
+    }
+
+    private class CurrentEvents extends Mynesweeper {
+        private int i, j;
+
+        private CurrentEvents(int i) {
+            this.i = i;
+            j = 0;
+        }
+
+        private CurrentEvents(int i, int j) {
+            this.i = i;
+            this.j = j;
+        }
+
+        public int getI() {
+            return i;
+        }
+
+        public int getJ() {
+            return j;
+        }
+
+        private void setI(int i) {
+            this.i = i;
+        }
+
+        private void setJ(int j) {
+            this.j = j;
+        }
     }
 }
