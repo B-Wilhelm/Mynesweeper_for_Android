@@ -48,6 +48,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
+    private int i, j;
 	
 	@Override
 	public void create () {
@@ -213,17 +214,19 @@ public class Mynesweeper extends ApplicationAdapter {
 
         /*----------------------------------------------------------------------------------------*/
 
-        Skin mineSkin = new Skin();
+        final Skin mineSkin = new Skin();
         Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
         TextButton.TextButtonStyle mineStyle;
-        CurrentEvents event;
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
-            events = new CurrentEvents(i);
-
+            this.i = i;
             minePix.setColor(mineColor);
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("gray", new Texture(minePix));
+            minePix.setColor(Color.WHITE);
+            minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
+            minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
+            mineSkin.add("white", new Texture(minePix));
             mineSkin.add("default", ubuntuFont);
 
             mineStyle = new TextButton.TextButtonStyle();
@@ -232,20 +235,24 @@ public class Mynesweeper extends ApplicationAdapter {
             mineStyle.font = mineSkin.getFont("default");
             mineSkin.add("default", mineStyle);
 
-            final TextButton temp = new TextButton("B", mineSkin);
+            final TextButton temp = new TextButton("", mineSkin);
             temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
 
             temp.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    if(!timerCheck) { timerCheck = true; }
+
+                    temp.setText("0");
+                    temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
+                    temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
+                    temp.setColor(Color.LIGHT_GRAY);
+
                     return true;
                 }
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                    if(!timerCheck) { timerCheck = true; }
 
-                    temp.setText("0");
-                    mineFieldValues.get().setRevealed(true);
                 }
             });
 
@@ -399,35 +406,5 @@ public class Mynesweeper extends ApplicationAdapter {
         private boolean getRevealed() {return revealed;}
 
         private void setRevealed(boolean revealed) {this.revealed = revealed;}
-    }
-
-    private class CurrentEvents extends Mynesweeper {
-        private int i, j;
-
-        private CurrentEvents(int i) {
-            this.i = i;
-            j = 0;
-        }
-
-        private CurrentEvents(int i, int j) {
-            this.i = i;
-            this.j = j;
-        }
-
-        public int getI() {
-            return i;
-        }
-
-        public int getJ() {
-            return j;
-        }
-
-        private void setI(int i) {
-            this.i = i;
-        }
-
-        private void setJ(int j) {
-            this.j = j;
-        }
     }
 }
