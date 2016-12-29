@@ -27,7 +27,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private static final int gridWidth = 8;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
-    private float sqSide = 0;
+    private float sqSide = 0, sqPos;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -35,7 +35,6 @@ public class Mynesweeper extends ApplicationAdapter {
 	private Texture img;
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
-    private Skin toggleSkin, mineSkin;
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
     private int bombCount, secTimer;
     private float timer;
@@ -45,8 +44,8 @@ public class Mynesweeper extends ApplicationAdapter {
     private MyButton toggleButton;
     private String[] toggleButtonText;
     private int toggleButtonIndex = 0;
-    private Color toggleButtonColor = new Color(200f / 255f, 200f / 255f, 0, 1), toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1), toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
-    private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1), mineColorClicked = new Color(131f/255f, 131f/255f, 131f/255f, 1);
+    private Color toggleButtonColor = new Color(200f/255f, 200f/255f, 0, 1), toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1), toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
+    private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
 	
@@ -81,7 +80,6 @@ public class Mynesweeper extends ApplicationAdapter {
 		batch.dispose();
 		img.dispose();
         stage.dispose();
-        mineSkin.dispose();
 	}
 
 	private void batchProcess() {
@@ -107,20 +105,12 @@ public class Mynesweeper extends ApplicationAdapter {
         shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
 
-        float sqPos;
-
         for(int i = 0; i < gridHeight; i++){
             for(int j = 0; j < gridWidth; j++){
 //                shape.setColor(Color.LIGHT_GRAY);
 //                shape.begin(ShapeRenderer.ShapeType.Filled);
 //                sqPos = sqSide;
 //                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
-//                shape.end();
-
-//                shape.setColor(Color.GRAY);
-//                shape.begin(ShapeRenderer.ShapeType.Filled);
-//                sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
-//                shape.rect(j*(sqSide) + sqPos, i*(sqSide)+btmRectHeight + sqPos, sqSide*.88f, sqSide*.88f);
 //                shape.end();
             }
         }
@@ -163,7 +153,7 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void setBackground(){
-        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
 
@@ -188,7 +178,7 @@ public class Mynesweeper extends ApplicationAdapter {
 
     private void initButtonValues() {
         toggleButton = new MyButtonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 10f);
-        float sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
+        sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
 
         for(int i = 0; i < gridHeight; i++) {
             for(int j = 0; j < gridWidth; j++) {
@@ -198,73 +188,68 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void initButtons() {
-        toggleSkin = new Skin();
+        Skin toggleSkin = new Skin();
         Pixmap toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
         roundedRect(toggleButtonPixmap, toggleButtonColor, 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
         toggleSkin.add("yellow", new Texture(toggleButtonPixmap));
+        toggleSkin.add("gray", new Texture(toggleButtonPixmap));
         toggleSkin.add("default", ubuntuFont);
 
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.up = toggleSkin.newDrawable("yellow", toggleButtonColor);
-        style.down = toggleSkin.newDrawable("yellow", toggleButtonShaded);
-        style.over = toggleSkin.newDrawable("yellow", toggleButtonClicked);
-        style.font = toggleSkin.getFont("default");
-        toggleSkin.add("default", style);
+        TextButton.TextButtonStyle toggleStyle = new TextButton.TextButtonStyle();
+        toggleStyle.up = toggleSkin.newDrawable("yellow", toggleButtonColor);
+        toggleStyle.down = toggleSkin.newDrawable("yellow", toggleButtonClicked);
+        toggleStyle.over = toggleSkin.newDrawable("yellow", toggleButtonShaded);
+        toggleStyle.font = toggleSkin.getFont("default");
+        toggleSkin.add("default", toggleStyle);
+
+        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
+        mineStyle.up = toggleSkin.newDrawable("gray", mineColor);
+        mineStyle.down = toggleSkin.newDrawable("gray", mineColorShaded);
+        mineStyle.over = toggleSkin.newDrawable("gray", toggleButtonColor);
+        mineStyle.font = toggleSkin.getFont("default");
+        toggleSkin.add("default", mineStyle);
 
         final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], toggleSkin);
         tB.setPosition(toggleButton.getX(), toggleButton.getY());
-
-        tB.addListener(new InputListener()
-        {
+        tB.addListener(new InputListener() {
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
-                toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
-                tB.setText(toggleButtonText[toggleButtonIndex]);
-
                 return true;
             }
 
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-
+                toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
+                tB.setText(toggleButtonText[toggleButtonIndex]);
             }
         });
         stage.addActor(tB);
 
         /*----------------------------------------------------------------------------------------*/
 
-        mineSkin = new Skin();
-        Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
-        mineSkin.add("gray", new Texture(minePix));
-        mineSkin.add("default", ubuntuFont);
-
-        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
-        mineStyle.up = mineSkin.newDrawable("gray", mineColor);
-        mineStyle.down = mineSkin.newDrawable("gray", mineColorShaded);
-        mineStyle.font = mineSkin.getFont("default");
-        mineSkin.add("default", mineStyle);
+        toggleButtonPixmap.setColor(toggleButtonColor);
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
-            minePix.setColor(mineColor);
-            minePix.drawRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
+            toggleButtonPixmap.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
 
-            final TextButton temp = new TextButton("0", mineSkin);
+            final TextButton temp = new TextButton("B", toggleSkin);
             temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
-            System.out.println((int)mineFieldValues.get(i).getX());
             temp.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    return false;
+                    return true;
                 }
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    temp.setText("0");
 //                    mineFieldValues.get(i*j).setRevealed(true);
                 }
             });
 
             mineField.add(temp);
             stage.addActor(temp);
-            }
+        }
 
+        stage.setDebugAll(true);
     }
 
     private void initFont(){
