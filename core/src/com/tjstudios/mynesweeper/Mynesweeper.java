@@ -192,7 +192,6 @@ public class Mynesweeper extends ApplicationAdapter {
         Pixmap toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
         roundedRect(toggleButtonPixmap, toggleButtonColor, 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
         toggleSkin.add("yellow", new Texture(toggleButtonPixmap));
-        toggleSkin.add("gray", new Texture(toggleButtonPixmap));
         toggleSkin.add("default", ubuntuFont);
 
         TextButton.TextButtonStyle toggleStyle = new TextButton.TextButtonStyle();
@@ -201,13 +200,6 @@ public class Mynesweeper extends ApplicationAdapter {
         toggleStyle.over = toggleSkin.newDrawable("yellow", toggleButtonShaded);
         toggleStyle.font = toggleSkin.getFont("default");
         toggleSkin.add("default", toggleStyle);
-
-        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
-        mineStyle.up = toggleSkin.newDrawable("gray", mineColor);
-        mineStyle.down = toggleSkin.newDrawable("gray", mineColorShaded);
-        mineStyle.over = toggleSkin.newDrawable("gray", toggleButtonColor);
-        mineStyle.font = toggleSkin.getFont("default");
-        toggleSkin.add("default", mineStyle);
 
         final TextButton tB = new TextButton(toggleButtonText[toggleButtonIndex], toggleSkin);
         tB.setPosition(toggleButton.getX(), toggleButton.getY());
@@ -226,10 +218,21 @@ public class Mynesweeper extends ApplicationAdapter {
 
         /*----------------------------------------------------------------------------------------*/
 
-        toggleButtonPixmap.setColor(toggleButtonColor);
+        toggleSkin = new Skin();
+        Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
+        toggleSkin.add("yellow", new Texture(minePix));
+        toggleSkin.add("default", ubuntuFont);
+
+        TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
+        mineStyle.up = toggleSkin.newDrawable("yellow", mineColor);
+        mineStyle.down = toggleSkin.newDrawable("yellow", mineColorShaded);
+        mineStyle.over = toggleSkin.newDrawable("yellow", mineColorShaded);
+        mineStyle.font = toggleSkin.getFont("default");
+        toggleSkin.add("default", mineStyle);
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
-            toggleButtonPixmap.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
+            minePix.setColor(mineColor);
+            minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
 
             final TextButton temp = new TextButton("B", toggleSkin);
             temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
