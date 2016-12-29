@@ -105,15 +105,20 @@ public class Mynesweeper extends ApplicationAdapter {
         shape.rect(0, 0, WIN_WIDTH, btmRectHeight);
         shape.end();
 
-        for(int i = 0; i < gridHeight; i++){
-            for(int j = 0; j < gridWidth; j++){
+        shape.setColor(Color.LIGHT_GRAY);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.rect(0, btmRectHeight, WIN_WIDTH, gridHeight * sqSide);
+        shape.end();
+
+//        for(int i = 0; i < gridHeight; i++){
+//            for(int j = 0; j < gridWidth; j++){
 //                shape.setColor(Color.LIGHT_GRAY);
 //                shape.begin(ShapeRenderer.ShapeType.Filled);
 //                sqPos = sqSide;
 //                shape.rect(j*(sqPos), i*(sqPos)+btmRectHeight, sqSide, sqSide);
 //                shape.end();
-            }
-        }
+//            }
+//        }
     }
 
     private void stageProcess(){
@@ -221,6 +226,7 @@ public class Mynesweeper extends ApplicationAdapter {
 
         Skin mineSkin = new Skin();
         Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
+        TextButton.TextButtonStyle mineStyle;
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
             minePix.setColor(mineColor);
@@ -228,7 +234,7 @@ public class Mynesweeper extends ApplicationAdapter {
             mineSkin.add("gray", new Texture(minePix));
             mineSkin.add("default", ubuntuFont);
 
-            TextButton.TextButtonStyle mineStyle = new TextButton.TextButtonStyle();
+            mineStyle = new TextButton.TextButtonStyle();
             mineStyle.up = mineSkin.newDrawable("gray", mineColor);
             mineStyle.down = mineSkin.newDrawable("gray", mineColorShaded);
             mineStyle.font = mineSkin.getFont("default");
