@@ -304,13 +304,18 @@ public class Mynesweeper extends ApplicationAdapter {
 
     private int bombCheck(int x, int y) {
         int value = 0;
+        int minX = -1, maxX = 1;
+        int minY = -1, maxY = 1;
 
-        if(x > 0 && x < gridWidth-1 && y > 0 && y < gridHeight-1) {
-            for(int i = -1; i <= 1; i++) {
-                for(int j = -1; j <= 1; j++) {
-                    if(mineVals[x+j][y+i] == 9) {
-                        value++;
-                    }
+        if(x == 0) { minX = 0; }
+        if(x == gridWidth-1) { maxX = 0; }
+        if(y == 0) { minY = 0; }
+        if(y == gridHeight-1) { maxY = 0; }
+
+        for(int i = minY; i <= maxY; i++) {
+            for(int j = minX; j <= maxX; j++) {
+                if(mineVals[x+j][y+i] == 9) {
+                    value++;
                 }
             }
         }
