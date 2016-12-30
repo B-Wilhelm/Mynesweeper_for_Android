@@ -21,13 +21,14 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Mynesweeper extends ApplicationAdapter {
     private static final int gridHeight = 11;
     private static final int gridWidth = 8;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
-    private float sqSide = 0, sqPos;
+    private float sqSide = 0;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -36,7 +37,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
     private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
-    private int bombCount, secTimer;
+    private int bombCount, curBombCount, secTimer;
     private float timer;
     private boolean timerCheck;
     private float btmRectHeight, topRectHeight;
@@ -49,12 +50,14 @@ public class Mynesweeper extends ApplicationAdapter {
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
     private int i, j;
-	
-	@Override
+    private int[][] mineVals;
+
+    @Override
 	public void create () {
         storeWindowAndPosition();                                                                   // Stores window size and position into their own variables
         initFont();                                                                                 // Creates freetype font and sets its properties
         initVars();
+        initGrid();
         initButtonValues();
         initButtons();
 
@@ -74,6 +77,7 @@ public class Mynesweeper extends ApplicationAdapter {
         shapeProcess();
         batchProcess();
         stageProcess();
+        gridProcess();
 	}
 	
 	@Override
@@ -159,6 +163,7 @@ public class Mynesweeper extends ApplicationAdapter {
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
         bombCount = 20;
+        curBombCount = bombCount;
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
@@ -173,7 +178,7 @@ public class Mynesweeper extends ApplicationAdapter {
 
     private void initButtonValues() {
         toggleButton = new MyButtonRounded(WIN_WIDTH*(.05f), btmRectHeight/10, WIN_WIDTH*(.9f), btmRectHeight*8/10, 10f);
-        sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
+        float sqPos = (WIN_WIDTH-WIN_WIDTH*.88f)/8/2;
 
         for(int i = 0; i < gridHeight; i++) {
             for(int j = 0; j < gridWidth; j++) {
@@ -202,14 +207,15 @@ public class Mynesweeper extends ApplicationAdapter {
         tB.addListener(new InputListener() {
             @Override
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
+                tB.setText(toggleButtonText[toggleButtonIndex]);
+
                 return true;
             }
 
-            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-                toggleButtonIndex = Math.abs(toggleButtonIndex - 1);
-                tB.setText(toggleButtonText[toggleButtonIndex]);
-            }
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {  }
         });
+
         stage.addActor(tB);
 
         /*----------------------------------------------------------------------------------------*/
@@ -236,6 +242,7 @@ public class Mynesweeper extends ApplicationAdapter {
             mineSkin.add("default", mineStyle);
 
             final TextButton temp = new TextButton("", mineSkin);
+            temp.setName("hidden");
             temp.setPosition((int)mineFieldValues.get(i).getX(), (int)mineFieldValues.get(i).getY());
 
             temp.addListener(new InputListener() {
@@ -243,7 +250,7 @@ public class Mynesweeper extends ApplicationAdapter {
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if(!timerCheck) { timerCheck = true; }
 
-                    temp.setText("0");
+                    temp.setName("revealed");
                     temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
                     temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
                     temp.setColor(Color.LIGHT_GRAY);
@@ -251,9 +258,7 @@ public class Mynesweeper extends ApplicationAdapter {
                     return true;
                 }
                 @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-
-                }
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {  }
             });
 
             mineField.add(temp);
@@ -279,6 +284,36 @@ public class Mynesweeper extends ApplicationAdapter {
         param.minFilter = Texture.TextureFilter.Linear;
         param.magFilter = Texture.TextureFilter.Linear;
         ubuntuFont = fontGen.generateFont(param);
+    }
+
+    private void initGrid() {
+        mineVals = new int[gridWidth][gridHeight];
+
+        for(int i = 0; i < bombCount; i++) {
+            mineVals[(int)(Math.random()*gridWidth)][(int)(Math.random()*gridHeight)] = 9;
+        }
+    }
+
+    private void gridProcess() {
+        String revealString = "";
+
+        for(int i = 0; i < gridHeight; i++) {
+            for(int j = 0; j < gridWidth; j++) {
+                if(mineField.get(i * gridWidth + j).getName().equals("revealed")) {
+                    if(mineVals[j][i] == 0) {
+                        revealString = "";
+                    }
+                    else if (mineVals[j][i] == 9){
+                        revealString = "B";
+                    }
+                    else {
+                        revealString = mineVals[j][i] + "";
+                    }
+
+                    mineField.get(i * gridWidth + j).setText(revealString);
+                }
+            }
+        }
     }
 
     private void storeWindowAndPosition(){
@@ -403,7 +438,7 @@ public class Mynesweeper extends ApplicationAdapter {
             yMinePos = y;
         }
 
-        private boolean getRevealed() {return revealed;}
+        public boolean getRevealed() {return revealed;}
 
         private void setRevealed(boolean revealed) {this.revealed = revealed;}
     }
