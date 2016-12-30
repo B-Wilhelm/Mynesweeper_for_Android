@@ -229,7 +229,8 @@ public class Mynesweeper extends ApplicationAdapter {
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("gray", new Texture(minePix));
             minePix.setColor(Color.WHITE);
-            minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
+
+            minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);       // Re-initialized for switching to gray upon touch
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("white", new Texture(minePix));
             mineSkin.add("default", ubuntuFont);
@@ -291,6 +292,30 @@ public class Mynesweeper extends ApplicationAdapter {
         for(int i = 0; i < bombCount; i++) {
             mineVals[(int)(Math.random()*gridWidth)][(int)(Math.random()*gridHeight)] = 9;
         }
+
+        for(int i = 0; i < gridHeight; i++) {
+            for(int j = 0; j < gridWidth; j++) {
+                if(mineVals[j][i] != 9) {
+                    mineVals[j][i] = bombCheck(j, i);
+                }
+            }
+        }
+    }
+
+    private int bombCheck(int x, int y) {
+        int value = 0;
+
+        if(x > 0 && x < gridWidth-1 && y > 0 && y < gridHeight-1) {
+            for(int i = -1; i <= 1; i++) {
+                for(int j = -1; j <= 1; j++) {
+                    if(mineVals[x+j][y+i] == 9) {
+                        value++;
+                    }
+                }
+            }
+        }
+
+        return value;
     }
 
     private void gridProcess() {
