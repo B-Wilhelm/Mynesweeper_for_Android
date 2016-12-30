@@ -19,13 +19,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Mynesweeper extends ApplicationAdapter {
-    private static final int gridHeight = 11;
-    private static final int gridWidth = 8;
+    private int gridWidth, gridHeight;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
     private float sqSide = 0;
@@ -49,7 +46,6 @@ public class Mynesweeper extends ApplicationAdapter {
     private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
-    private int i, j;
     private int[][] mineVals;
 
     @Override
@@ -159,9 +155,12 @@ public class Mynesweeper extends ApplicationAdapter {
     private void initVars(){
         mineStatus = new String[]{" ", "1", "2", "3", "4", "5", "6", "7", "8", "BOMB"};             // 0 is blank, 9 is bomb and 1-8 are adjacent bomb counts
         toggleButtonText = new String[]{"BOMB", "FLAG"};
+        gridWidth = 8;
+        gridHeight = 11;
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
+        System.out.println(topRectHeight);
         bombCount = curBombCount = 20;
         secTimer = 0;
         timer = 0f;
@@ -224,7 +223,6 @@ public class Mynesweeper extends ApplicationAdapter {
         TextButton.TextButtonStyle mineStyle;
 
         for(int i = 0; i < mineFieldValues.size(); i++) {
-            this.i = i;
             minePix.setColor(mineColor);
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("gray", new Texture(minePix));
