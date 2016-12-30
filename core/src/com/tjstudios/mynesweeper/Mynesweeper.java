@@ -54,8 +54,8 @@ public class Mynesweeper extends ApplicationAdapter {
 
     @Override
 	public void create () {
-        storeWindowAndPosition();                                                                   // Stores window size and position into their own variables
-        initFont();                                                                                 // Creates freetype font and sets its properties
+        storeWindowAndPosition();   // Stores window size and position into their own variables
+        initFont();                 // Creates freetype font and sets its properties
         initVars();
         initGrid();
         initButtonValues();
@@ -69,7 +69,7 @@ public class Mynesweeper extends ApplicationAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        bombLayout.setText(clockFont, "Bombs:" + bombCount);
+        bombLayout.setText(clockFont, "Bombs:" + curBombCount);
         timerLayout.setText(clockFont, "Time:" + secTimer);
 
         incrementTimer();
@@ -162,8 +162,7 @@ public class Mynesweeper extends ApplicationAdapter {
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
-        bombCount = 20;
-        curBombCount = bombCount;
+        bombCount = curBombCount = 20;
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
@@ -295,19 +294,23 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void gridProcess() {
-        String revealString = "";
+        String revealString;
 
         for(int i = 0; i < gridHeight; i++) {
             for(int j = 0; j < gridWidth; j++) {
                 if(mineField.get(i * gridWidth + j).getName().equals("revealed")) {
                     if(mineVals[j][i] == 0) {
-                        revealString = "";
+                        revealString = " ";
+                        mineField.get(i * gridWidth + j).setName("empty");
                     }
-                    else if (mineVals[j][i] == 9){
+                    else if ((mineVals[j][i] == 9)){
                         revealString = "B";
+                        curBombCount--;
+                        mineField.get(i * gridWidth + j).setName("bomb");
                     }
                     else {
                         revealString = mineVals[j][i] + "";
+                        mineField.get(i * gridWidth + j).setName("value");
                     }
 
                     mineField.get(i * gridWidth + j).setText(revealString);
