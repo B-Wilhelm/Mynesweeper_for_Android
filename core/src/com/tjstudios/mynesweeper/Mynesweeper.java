@@ -25,7 +25,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private int gridWidth, gridHeight;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
-    private float sqSide = 0;
+    private float sqSide;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -33,7 +33,7 @@ public class Mynesweeper extends ApplicationAdapter {
 	private Texture img;
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
-    private int WIN_WIDTH = 0, WIN_HEIGHT = 0;
+    private int WIN_WIDTH, WIN_HEIGHT;
     private int bombCount, curBombCount, secTimer;
     private float timer;
     private boolean timerCheck;
@@ -41,9 +41,9 @@ public class Mynesweeper extends ApplicationAdapter {
     private GlyphLayout timerLayout = new GlyphLayout(), bombLayout = new GlyphLayout();
     private MyButton toggleButton;
     private String[] toggleButtonText;
-    private int toggleButtonIndex = 0;
-    private Color toggleButtonColor = new Color(200f/255f, 200f/255f, 0, 1), toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1), toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
-    private Color mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1), mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
+    private int toggleButtonIndex;
+    private Color toggleButtonColor, toggleButtonShaded, toggleButtonClicked;
+    private Color mineColor, mineColorShaded;
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
     private int[][] mineVals;
@@ -155,12 +155,12 @@ public class Mynesweeper extends ApplicationAdapter {
     private void initVars(){
         mineStatus = new String[]{" ", "1", "2", "3", "4", "5", "6", "7", "8", "BOMB"};             // 0 is blank, 9 is bomb and 1-8 are adjacent bomb counts
         toggleButtonText = new String[]{"BOMB", "FLAG"};
+        toggleButtonIndex = 0;
         gridWidth = 8;
         gridHeight = 11;
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
-        System.out.println(topRectHeight);
         bombCount = curBombCount = 20;
         secTimer = 0;
         timer = 0f;
@@ -172,6 +172,12 @@ public class Mynesweeper extends ApplicationAdapter {
         batch = new SpriteBatch();
         img = new Texture("minesweep.png");
         MINE_X_SIZE = MINE_Y_SIZE = sqSide*.88f;
+        toggleButtonColor = new Color(200f/255f, 200f/255f, 0, 1);
+        toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1);
+        toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
+        mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1);
+        mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
+
     }
 
     private void initButtonValues() {
