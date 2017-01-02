@@ -12,14 +12,19 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
+
+import static com.badlogic.gdx.graphics.profiling.GLProfiler.listener;
 
 public class Mynesweeper extends ApplicationAdapter {
     private int gridWidth, gridHeight;
@@ -33,6 +38,7 @@ public class Mynesweeper extends ApplicationAdapter {
 	private Texture img;
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
+    private Skin toggleSkin;
     private int WIN_WIDTH, WIN_HEIGHT;
     private int bombCount, curBombCount, secTimer;
     private float timer;
@@ -69,7 +75,7 @@ public class Mynesweeper extends ApplicationAdapter {
         timerLayout.setText(clockFont, "Time:" + secTimer);
 
         incrementTimer();
-		setBackground();                                                                                // Sets background color
+		setBackground();    // Sets background color
         shapeProcess();
         batchProcess();
         stageProcess();
@@ -80,6 +86,7 @@ public class Mynesweeper extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+        toggleSkin.dispose();
         stage.dispose();
 	}
 
@@ -155,6 +162,8 @@ public class Mynesweeper extends ApplicationAdapter {
     private void initVars(){
         mineStatus = new String[]{" ", "1", "2", "3", "4", "5", "6", "7", "8", "BOMB"};             // 0 is blank, 9 is bomb and 1-8 are adjacent bomb counts
         toggleButtonText = new String[]{"BOMB", "FLAG"};
+        mineField = new ArrayList<TextButton>();
+        mineFieldValues = new ArrayList<MineButton>();
         toggleButtonIndex = 0;
         gridWidth = 8;
         gridHeight = 11;
@@ -177,7 +186,6 @@ public class Mynesweeper extends ApplicationAdapter {
         toggleButtonClicked = new Color(158f/255f, 158f/255f, 0, 1);
         mineColor = new Color(169f/255f, 169f/255f, 169f/255f, 1);
         mineColorShaded = new Color(150f/255f, 150f/255f, 150f/255f, 1);
-
     }
 
     private void initButtonValues() {
@@ -192,11 +200,10 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void initButtons() {
-        Skin toggleSkin = new Skin();
+        toggleSkin = new Skin();
         Pixmap toggleButtonPixmap = new Pixmap((int)toggleButton.getXSize(), (int)toggleButton.getYSize(), Pixmap.Format.RGBA8888);
         roundedRect(toggleButtonPixmap, toggleButtonColor, 0, 0, (int)toggleButton.getXSize(), (int)toggleButton.getYSize(), (int)(((MyButtonRounded)toggleButton).getRadius()*Gdx.graphics.getDensity()));
         toggleSkin.add("yellow", new Texture(toggleButtonPixmap));
-        toggleButtonPixmap.dispose();
         toggleSkin.add("default", ubuntuFont);
 
         TextButton.TextButtonStyle toggleStyle = new TextButton.TextButtonStyle();
@@ -218,6 +225,18 @@ public class Mynesweeper extends ApplicationAdapter {
             }
 
             public void touchUp (InputEvent event, float x, float y, int pointer, int button) {  }
+        });
+
+        tB.addListener(new ActorGestureListener() {
+            @Override
+            public boolean longPress(Actor actor, float x, float y) {
+                initVars();
+                initGrid();
+                initButtonValues();
+                initButtons();
+
+                return true;
+            }
         });
 
         stage.addActor(tB);
@@ -268,6 +287,8 @@ public class Mynesweeper extends ApplicationAdapter {
             mineField.add(temp);
             stage.addActor(temp);
         }
+
+        minePix.dispose();
     }
 
     private void initFont(){
@@ -478,5 +499,18 @@ public class Mynesweeper extends ApplicationAdapter {
         public boolean getRevealed() {return revealed;}
 
         private void setRevealed(boolean revealed) {this.revealed = revealed;}
+    }
+
+    public class MyGestureDetector extends GestureDetector {
+        public MyGestureDetector(GestureListener listener) {
+            super(listener);
+        }
+
+        @Override
+        public boolean isLongPressed() {
+
+
+            return true;
+        }
     }
 }
