@@ -1,7 +1,9 @@
 package com.tjstudios.mynesweeper;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -26,7 +28,7 @@ import java.util.ArrayList;
 
 import static com.badlogic.gdx.graphics.profiling.GLProfiler.listener;
 
-public class Mynesweeper extends ApplicationAdapter {
+public class Mynesweeper extends Game implements Screen {
     private int gridWidth, gridHeight;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
@@ -44,7 +46,7 @@ public class Mynesweeper extends ApplicationAdapter {
     private float timer;
     private boolean timerCheck;
     private float btmRectHeight, topRectHeight;
-    private GlyphLayout timerLayout = new GlyphLayout(), bombLayout = new GlyphLayout();
+    private GlyphLayout timerLayout, bombLayout;
     private MyButton toggleButton;
     private String[] toggleButtonText;
     private int toggleButtonIndex;
@@ -55,7 +57,12 @@ public class Mynesweeper extends ApplicationAdapter {
     private int[][] mineVals;
 
     @Override
-	public void create () {
+    public void show() {
+
+    }
+
+    @Override
+	public void create() {
         storeWindowAndPosition();   // Stores window size and position into their own variables
         initFont();                 // Creates freetype font and sets its properties
         initVars();
@@ -63,11 +70,15 @@ public class Mynesweeper extends ApplicationAdapter {
         initButtonValues();
         initButtons();
 
+        stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
+
+        this.setScreen(new Mynesweeper());
 	}
 
 	@Override
-	public void render () {
+	public void render() {
+        super.render();
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
@@ -81,9 +92,19 @@ public class Mynesweeper extends ApplicationAdapter {
         stageProcess();
         gridProcess();
 	}
+
+	@Override
+    public void render(float deltaTime) {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
 	
 	@Override
-	public void dispose () {
+	public void dispose() {
 		batch.dispose();
 		img.dispose();
         toggleSkin.dispose();
@@ -143,7 +164,7 @@ public class Mynesweeper extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+//        viewport.update(width, height);
     }
 
     @Override
@@ -160,10 +181,18 @@ public class Mynesweeper extends ApplicationAdapter {
     }
 
     private void initVars(){
+        camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
+        viewport = new ScreenViewport(camera);
+        shape = new ShapeRenderer();
+        stage = new Stage();
+        batch = new SpriteBatch();
+        img = new Texture("minesweep.png");
         mineStatus = new String[]{" ", "1", "2", "3", "4", "5", "6", "7", "8", "BOMB"};             // 0 is blank, 9 is bomb and 1-8 are adjacent bomb counts
         toggleButtonText = new String[]{"BOMB", "FLAG"};
-        mineField = new ArrayList<TextButton>();
-        mineFieldValues = new ArrayList<MineButton>();
+        timerLayout = new GlyphLayout();
+        bombLayout = new GlyphLayout();
+        mineField.clear();
+        mineFieldValues.clear();
         toggleButtonIndex = 0;
         gridWidth = 8;
         gridHeight = 11;
@@ -174,12 +203,6 @@ public class Mynesweeper extends ApplicationAdapter {
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
-        camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
-        viewport = new ScreenViewport(camera);
-        shape = new ShapeRenderer();
-        stage = new Stage();
-        batch = new SpriteBatch();
-        img = new Texture("minesweep.png");
         MINE_X_SIZE = MINE_Y_SIZE = sqSide*.88f;
         toggleButtonColor = new Color(200f/255f, 200f/255f, 0, 1);
         toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1);
@@ -231,9 +254,11 @@ public class Mynesweeper extends ApplicationAdapter {
             @Override
             public boolean longPress(Actor actor, float x, float y) {
                 initVars();
+                initFont();
                 initGrid();
                 initButtonValues();
                 initButtons();
+//                setScreen(new Mynesweeper());
 
                 return true;
             }
@@ -499,18 +524,5 @@ public class Mynesweeper extends ApplicationAdapter {
         public boolean getRevealed() {return revealed;}
 
         private void setRevealed(boolean revealed) {this.revealed = revealed;}
-    }
-
-    public class MyGestureDetector extends GestureDetector {
-        public MyGestureDetector(GestureListener listener) {
-            super(listener);
-        }
-
-        @Override
-        public boolean isLongPressed() {
-
-
-            return true;
-        }
     }
 }
