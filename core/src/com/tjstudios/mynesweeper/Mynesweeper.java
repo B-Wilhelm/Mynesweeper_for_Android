@@ -28,7 +28,7 @@ import java.util.ArrayList;
 
 import static com.badlogic.gdx.graphics.profiling.GLProfiler.listener;
 
-public class Mynesweeper extends Game implements Screen {
+public class Mynesweeper extends Game {
     private int gridWidth, gridHeight;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private String[] mineStatus;
@@ -57,34 +57,25 @@ public class Mynesweeper extends Game implements Screen {
     private int[][] mineVals;
 
     @Override
-    public void show() {
-
-    }
-
-    @Override
 	public void create() {
         storeWindowAndPosition();   // Stores window size and position into their own variables
         initFont();                 // Creates freetype font and sets its properties
         initVars();
-        initGrid();
         initButtonValues();
         initButtons();
+        initGrid();
 
-        stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
-
-        this.setScreen(new Mynesweeper());
+//        this.setScreen(new Mynesweeper());
+//        stage.setDebugAll(true);
 	}
 
 	@Override
 	public void render() {
         super.render();
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
 
-        bombLayout.setText(clockFont, "Bombs:" + curBombCount);
-        timerLayout.setText(clockFont, "Time:" + secTimer);
-
+        cameraSetup();
+        bombText();
         incrementTimer();
 		setBackground();    // Sets background color
         shapeProcess();
@@ -92,16 +83,6 @@ public class Mynesweeper extends Game implements Screen {
         stageProcess();
         gridProcess();
 	}
-
-	@Override
-    public void render(float deltaTime) {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
 	
 	@Override
 	public void dispose() {
@@ -164,7 +145,7 @@ public class Mynesweeper extends Game implements Screen {
 
     @Override
     public void resize(int width, int height) {
-//        viewport.update(width, height);
+        viewport.update(width, height);
     }
 
     @Override
@@ -199,7 +180,8 @@ public class Mynesweeper extends Game implements Screen {
         sqSide = WIN_WIDTH/8;
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
-        bombCount = curBombCount = 20;
+        bombCount = 20;
+        curBombCount = 20;
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
@@ -255,10 +237,9 @@ public class Mynesweeper extends Game implements Screen {
             public boolean longPress(Actor actor, float x, float y) {
                 initVars();
                 initFont();
-                initGrid();
                 initButtonValues();
                 initButtons();
-//                setScreen(new Mynesweeper());
+                initGrid();
 
                 return true;
             }
@@ -266,7 +247,7 @@ public class Mynesweeper extends Game implements Screen {
 
         stage.addActor(tB);
 
-        /*----------------------------------------------------------------------------------------*/
+        /*------------------------------------------------------------------------------------------------------------------------------------*/
 
         final Skin mineSkin = new Skin();
         Pixmap minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);
@@ -277,16 +258,16 @@ public class Mynesweeper extends Game implements Screen {
             minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("gray", new Texture(minePix));
             minePix.setColor(Color.WHITE);
-
-            minePix = new Pixmap((int)MINE_X_SIZE, (int)MINE_Y_SIZE, Pixmap.Format.RGBA8888);       // Re-initialized for switching to gray upon touch
-            minePix.fillRectangle(0, 0, (int)MINE_X_SIZE, (int)MINE_Y_SIZE);
             mineSkin.add("white", new Texture(minePix));
+            minePix.setColor(Color.RED);
+            mineSkin.add("red", new Texture(minePix));
             mineSkin.add("default", ubuntuFont);
 
             mineStyle = new TextButton.TextButtonStyle();
             mineStyle.up = mineSkin.newDrawable("gray", mineColor);
             mineStyle.down = mineSkin.newDrawable("gray", mineColorShaded);
             mineStyle.font = mineSkin.getFont("default");
+
             mineSkin.add("default", mineStyle);
 
             final TextButton temp = new TextButton("", mineSkin);
@@ -298,10 +279,28 @@ public class Mynesweeper extends Game implements Screen {
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if(!timerCheck) { timerCheck = true; }
 
-                    temp.setName("revealed");
-                    temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
-                    temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
-                    temp.setColor(Color.LIGHT_GRAY);
+                    if(temp.getName().equals("hidden") || temp.getName().equals("flagged")) {
+                        if(toggleButtonIndex == 0 && temp.getName().equals("hidden")) {   // if ToggleButton's text is "BOMB"
+                            System.out.println(temp.getName());
+                            temp.setName("revealed");
+                            temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
+                            temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
+                        }
+                        else if(toggleButtonIndex != 0) {  // if ToggleButton's text is "FLAG"
+                            if(temp.getName().equals("flagged")) {
+                                System.out.println(temp.getName());
+                                temp.setName("hidden");
+                                temp.getStyle().up = mineSkin.newDrawable("gray", mineColor);
+                                temp.getStyle().down = mineSkin.newDrawable("gray", mineColorShaded);
+                            }
+                            else {
+                                System.out.println(temp.getName());
+                                temp.setName("flagged");
+                                temp.getStyle().up = mineSkin.newDrawable("red", Color.FIREBRICK);
+                                temp.getStyle().down = mineSkin.newDrawable("red", Color.FIREBRICK);
+                            }
+                        }
+                    }
 
                     return true;
                 }
@@ -373,30 +372,48 @@ public class Mynesweeper extends Game implements Screen {
         return value;
     }
 
+    private void emptySpaceCheck(int x, int y) {
+
+    }
+
     private void gridProcess() {
-        String revealString;
+        String revealString, revealName;
+        TextButton temp;
 
         for(int i = 0; i < gridHeight; i++) {
             for(int j = 0; j < gridWidth; j++) {
-                if(mineField.get(i * gridWidth + j).getName().equals("revealed")) {
+                temp = mineField.get(i * gridWidth + j);
+
+                if(temp.getName().equals("revealed")) {
                     if(mineVals[j][i] == 0) {
                         revealString = " ";
-                        mineField.get(i * gridWidth + j).setName("empty");
+                        revealName = "empty";
                     }
                     else if ((mineVals[j][i] == 9)){
                         revealString = "B";
                         curBombCount--;
-                        mineField.get(i * gridWidth + j).setName("bomb");
+                        revealName = "bomb";
                     }
                     else {
                         revealString = mineVals[j][i] + "";
-                        mineField.get(i * gridWidth + j).setName("value");
+                        revealName = "value";
                     }
 
-                    mineField.get(i * gridWidth + j).setText(revealString);
+                    temp.setText(revealString);
+                    temp.setName(revealName);
                 }
             }
         }
+    }
+
+    private void bombText() {
+        bombLayout.setText(clockFont, "Bombs:" + curBombCount);
+        timerLayout.setText(clockFont, "Time:" + secTimer);
+    }
+
+    private void cameraSetup() {
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
     }
 
     private void storeWindowAndPosition(){
