@@ -30,9 +30,16 @@ import static com.badlogic.gdx.graphics.profiling.GLProfiler.listener;
 
 public class Mynesweeper extends Game {
     private int gridWidth, gridHeight;
+    private int WIN_WIDTH, WIN_HEIGHT;
+    private int bombCount, curBombCount, secTimer;
+    private int toggleButtonIndex;
+    private int[][] mineVals;
     private float MINE_X_SIZE, MINE_Y_SIZE;
-    private String[] mineStatus;
     private float sqSide;
+    private float timer;
+    private float btmRectHeight, topRectHeight;
+    private boolean timerCheck;
+    private String[] mineStatus, toggleButtonText;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -41,20 +48,12 @@ public class Mynesweeper extends Game {
     private BitmapFont clockFont, ubuntuFont;
     private Stage stage;
     private Skin toggleSkin;
-    private int WIN_WIDTH, WIN_HEIGHT;
-    private int bombCount, curBombCount, secTimer;
-    private float timer;
-    private boolean timerCheck;
-    private float btmRectHeight, topRectHeight;
     private GlyphLayout timerLayout, bombLayout;
     private MyButton toggleButton;
-    private String[] toggleButtonText;
-    private int toggleButtonIndex;
     private Color toggleButtonColor, toggleButtonShaded, toggleButtonClicked;
     private Color mineColor, mineColorShaded;
     private ArrayList<TextButton> mineField = new ArrayList<TextButton>();
     private ArrayList<MineButton> mineFieldValues = new ArrayList<MineButton>();
-    private int[][] mineVals;
 
     @Override
 	public void create() {
