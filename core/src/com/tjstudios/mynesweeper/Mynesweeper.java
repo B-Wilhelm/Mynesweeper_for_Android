@@ -374,6 +374,31 @@ public class Mynesweeper extends Game {
 
     private void emptySpaceCheck(int x, int y) {
 
+        mineField.get(y * gridWidth + x).setName("cluster " + );
+
+        if(x > 0) { emptySpaceCheck(x-1, y); }
+        if(x > gridWidth) { emptySpaceCheck(x+1, y); }
+        if(y > 0) { emptySpaceCheck(x, y-1); }
+        if(y > gridHeight) { emptySpaceCheck(x, y+1); }
+
+        ///////////////////////////////////////////////////////////////////////////////
+
+        int value = 0;
+        int minX = -1, maxX = 1;
+        int minY = -1, maxY = 1;
+
+        if(x == 0) { minX = 0; }
+        if(x == gridWidth-1) { maxX = 0; }
+        if(y == 0) { minY = 0; }
+        if(y == gridHeight-1) { maxY = 0; }
+
+        for(int i = minY; i <= maxY; i++) {
+            for(int j = minX; j <= maxX; j++) {
+                if(mineVals[x+j][y+i] == 9) {
+                    value++;
+                }
+            }
+        }
     }
 
     private void gridProcess() {
