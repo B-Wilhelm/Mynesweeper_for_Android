@@ -33,6 +33,7 @@ public class Mynesweeper extends Game {
     private int WIN_WIDTH, WIN_HEIGHT;
     private int bombCount, curBombCount, secTimer;
     private int toggleButtonIndex;
+    private int clusterNum;
     private int[][] mineVals;
     private float MINE_X_SIZE, MINE_Y_SIZE;
     private float sqSide;
@@ -184,6 +185,7 @@ public class Mynesweeper extends Game {
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
+        clusterNum = 0;
         MINE_X_SIZE = MINE_Y_SIZE = sqSide*.88f;
         toggleButtonColor = new Color(200f/255f, 200f/255f, 0, 1);
         toggleButtonShaded = new Color(179f/255f, 179f/255f, 0, 1);
@@ -373,31 +375,17 @@ public class Mynesweeper extends Game {
 
     private void emptySpaceCheck(int x, int y) {
 
-        mineField.get(y * gridWidth + x).setName("cluster " + );
+        emptySpaceCheckRec(x, y);
+    }
 
-        if(x > 0) { emptySpaceCheck(x-1, y); }
-        if(x > gridWidth) { emptySpaceCheck(x+1, y); }
-        if(y > 0) { emptySpaceCheck(x, y-1); }
-        if(y > gridHeight) { emptySpaceCheck(x, y+1); }
+    private void emptySpaceCheckRec(int x, int y) {
 
-        ///////////////////////////////////////////////////////////////////////////////
+        mineField.get(y * gridWidth + x).setName("cluster " + clusterNum);
 
-        int value = 0;
-        int minX = -1, maxX = 1;
-        int minY = -1, maxY = 1;
-
-        if(x == 0) { minX = 0; }
-        if(x == gridWidth-1) { maxX = 0; }
-        if(y == 0) { minY = 0; }
-        if(y == gridHeight-1) { maxY = 0; }
-
-        for(int i = minY; i <= maxY; i++) {
-            for(int j = minX; j <= maxX; j++) {
-                if(mineVals[x+j][y+i] == 9) {
-                    value++;
-                }
-            }
-        }
+        if(x > 0) { emptySpaceCheckRec(x-1, y); }
+        if(x > gridWidth) { emptySpaceCheckRec(x+1, y); }
+        if(y > 0) { emptySpaceCheckRec(x, y-1); }
+        if(y > gridHeight) { emptySpaceCheckRec(x, y+1); }
     }
 
     private void gridProcess() {
