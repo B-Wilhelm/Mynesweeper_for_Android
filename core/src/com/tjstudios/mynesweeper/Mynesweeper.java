@@ -282,21 +282,20 @@ public class Mynesweeper extends Game {
 
                     if(temp.getName().equals("hidden") || temp.getName().equals("flagged")) {
                         if(toggleButtonIndex == 0 && temp.getName().equals("hidden")) {   // if ToggleButton's text is "BOMB"
-                            System.out.println(temp.getName());
                             temp.setName("revealed");
                             temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
                             temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
                         }
                         else if(toggleButtonIndex != 0) {  // if ToggleButton's text is "FLAG"
                             if(temp.getName().equals("flagged")) {
-                                System.out.println(temp.getName());
                                 temp.setName("hidden");
+                                curBombCount++;
                                 temp.getStyle().up = mineSkin.newDrawable("gray", mineColor);
                                 temp.getStyle().down = mineSkin.newDrawable("gray", mineColorShaded);
                             }
                             else {
-                                System.out.println(temp.getName());
                                 temp.setName("flagged");
+                                curBombCount--;
                                 temp.getStyle().up = mineSkin.newDrawable("red", Color.FIREBRICK);
                                 temp.getStyle().down = mineSkin.newDrawable("red", Color.FIREBRICK);
                             }
