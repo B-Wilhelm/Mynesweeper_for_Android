@@ -1,9 +1,8 @@
 package com.tjstudios.mynesweeper;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -14,7 +13,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -26,9 +24,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 
-import static com.badlogic.gdx.graphics.profiling.GLProfiler.listener;
-
 public class Mynesweeper extends Game {
+    private boolean lossCheck, winCheck;
+    private int endDelay;
     private int gridWidth, gridHeight;
     private int WIN_WIDTH, WIN_HEIGHT;
     private int bombCount, curBombCount, secTimer;
@@ -64,6 +62,7 @@ public class Mynesweeper extends Game {
         initButtonValues();
         initButtons();
         initGrid();
+        setBackground();    // Sets background color
 
         Gdx.input.setInputProcessor(stage);
 //        this.setScreen(new Mynesweeper());
@@ -72,16 +71,22 @@ public class Mynesweeper extends Game {
 
 	@Override
 	public void render() {
+
         super.render();
 
-        cameraSetup();
-        bombText();
-        incrementTimer();
-		setBackground();    // Sets background color
-        shapeProcess();
-        batchProcess();
-        stageProcess();
-        gridProcess();
+        if(endDelay < 3) {
+
+            if(lossCheck) {
+                endDelay++;
+            }
+            cameraSetup();
+            bombText();
+            incrementTimer();
+            shapeProcess();
+            batchProcess();
+            stageProcess();
+            gridProcess();
+        }
 	}
 	
 	@Override
@@ -162,6 +167,8 @@ public class Mynesweeper extends Game {
     }
 
     private void initVars(){
+        lossCheck = false;
+        endDelay = 0;
         camera = new OrthographicCamera(WIN_WIDTH, WIN_HEIGHT);
         viewport = new ScreenViewport(camera);
         shape = new ShapeRenderer();
@@ -402,8 +409,8 @@ public class Mynesweeper extends Game {
                     }
                     else if ((mineVals[j][i] == 9)){
                         revealString = "B";
-                        curBombCount--;
                         revealName = "bomb";
+                        lossCheck = true;
                     }
                     else {
                         revealString = mineVals[j][i] + "";
@@ -418,8 +425,18 @@ public class Mynesweeper extends Game {
     }
 
     private void bombText() {
-        bombLayout.setText(clockFont, "Bombs:" + curBombCount);
-        timerLayout.setText(clockFont, "Time:" + secTimer);
+        if(!lossCheck) {
+            bombLayout.setText(clockFont, "Bombs:" + curBombCount);
+            timerLayout.setText(clockFont, "Time:" + secTimer);
+        }
+        else if(!winCheck) {
+            bombLayout.setText(clockFont, "YOU");
+            timerLayout.setText(clockFont, "WIN");
+        }
+        else {
+            bombLayout.setText(clockFont, "YOU");
+            timerLayout.setText(clockFont, "WIN");
+        }
     }
 
     private void cameraSetup() {
