@@ -28,7 +28,7 @@ public class Mynesweeper extends Game {
     private int endDelay;
     private int gridWidth, gridHeight;
     private int WIN_WIDTH, WIN_HEIGHT;
-    private int bombCount, curBombCount, secTimer, mineCounter;
+    private int bombCount, curFlagCount, secTimer, mineCounter, numRevealed;
     private int toggleButtonIndex;
     private int clusterNum;
     private int[][] mineVals;
@@ -76,7 +76,7 @@ public class Mynesweeper extends Game {
 
         if(endDelay < 3) {
 
-            if(lossCheck) {
+            if(lossCheck || winCheck) {
                 endDelay++;
             }
             cameraSetup();
@@ -188,8 +188,9 @@ public class Mynesweeper extends Game {
         btmRectHeight = WIN_HEIGHT/8;
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
         bombCount = 20;
-        curBombCount = 20;
+        curFlagCount = 20;
         mineCounter = 20;
+        numRevealed = 0;
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
@@ -291,19 +292,20 @@ public class Mynesweeper extends Game {
                     if(temp.getName().equals("hidden") || temp.getName().equals("flagged") || temp.getName().equals("flag")) {
                         if(toggleButtonIndex == 0 && temp.getName().equals("hidden")) {   // if ToggleButton's text is "BOMB"
                             temp.setName("revealed");
+                            numRevealed++;
                             temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
                             temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
                         }
                         else if(toggleButtonIndex != 0) {  // if ToggleButton's text is "FLAG"
                             if(temp.getName().equals("flagged") || temp.getName().equals("flag")) {
                                 temp.setName("unflagged");
-                                curBombCount++;
+                                curFlagCount++;
                                 temp.getStyle().up = mineSkin.newDrawable("gray", mineColor);
                                 temp.getStyle().down = mineSkin.newDrawable("gray", mineColorShaded);
                             }
                             else {
                                 temp.setName("flagged");
-                                curBombCount--;
+                                curFlagCount--;
                                 temp.getStyle().up = mineSkin.newDrawable("red", Color.FIREBRICK);
                                 temp.getStyle().down = mineSkin.newDrawable("red", Color.FIREBRICK);
                             }
@@ -345,9 +347,18 @@ public class Mynesweeper extends Game {
 
     private void initGrid() {
         mineVals = new int[gridWidth][gridHeight];
+        double randX = Math.random();
+        double randY = Math.random();
 
-        for(int i = 0; i < bombCount; i++) {
-            mineVals[(int)(Math.random()*gridWidth)][(int)(Math.random()*gridHeight)] = 9;
+        for(int i = 0; i < bombCount ; i++) {
+            if(mineVals[(int)(randX * gridWidth)][(int)(randY * gridHeight)] == 9) {
+                i--;
+            }
+            else {
+                mineVals[(int) (randX * gridWidth)][(int) (randY * gridHeight)] = 9;
+            }
+            randX = Math.random();
+            randY = Math.random();
         }
 
         for(int i = 0; i < gridHeight; i++) {
@@ -422,22 +433,24 @@ public class Mynesweeper extends Game {
                     temp.setName(revealName);
                 }
 
-                if(temp.getName().equals("flagged")) {
+                else if(temp.getName().equals("flagged")) {
                     if ((mineVals[j][i] == 9)){
                         mineCounter--;
-                        flaggedName = "flag";
                     }
 
-                    temp.setName(flaggedName);
+                    temp.setName("flag");
                 }
 
-                if(temp.getName().equals("unflagged")) {
+                else if(temp.getName().equals("unflagged")) {
                     if ((mineVals[j][i] == 9)){
                         mineCounter++;
-                        unflaggedName = "hidden";
                     }
 
-                    temp.setName(unflaggedName);
+                    temp.setName("hidden");
+                }
+
+                if(mineCounter <= 0 && numRevealed == (gridHeight * gridWidth - bombCount)) {
+                    winCheck = true;
                 }
             }
         }
@@ -453,7 +466,7 @@ public class Mynesweeper extends Game {
             timerLayout.setText(clockFont, "WIN");
         }
         else {
-            bombLayout.setText(clockFont, "Bombs:" + curBombCount);
+            bombLayout.setText(clockFont, "Bombs:" + curFlagCount);
             timerLayout.setText(clockFont, "Time:" + secTimer);
         }
     }
