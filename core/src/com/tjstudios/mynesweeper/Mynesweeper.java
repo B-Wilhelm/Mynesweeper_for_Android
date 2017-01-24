@@ -508,7 +508,7 @@ public class Mynesweeper extends Game {
             text = theText;
         }
 
-        public float getX() {
+        float getX() {
             return xPos;
         }
 
@@ -516,7 +516,7 @@ public class Mynesweeper extends Game {
             xPos = x;
         }
 
-        public float getY() {
+        float getY() {
             return yPos;
         }
 
@@ -524,7 +524,7 @@ public class Mynesweeper extends Game {
             yPos = y;
         }
 
-        private float getXSize() {
+        float getXSize() {
             return xSize;
         }
 
@@ -532,7 +532,7 @@ public class Mynesweeper extends Game {
             xSize = x;
         }
 
-        private float getYSize() {
+        float getYSize() {
             return ySize;
         }
 
@@ -540,7 +540,7 @@ public class Mynesweeper extends Game {
             ySize = y;
         }
 
-        private String getText() {
+        String getText() {
             return text;
         }
 
@@ -562,7 +562,7 @@ public class Mynesweeper extends Game {
             radius = r;
         }
 
-        public float getRadius() {
+        float getRadius() {
             return radius;
         }
 
