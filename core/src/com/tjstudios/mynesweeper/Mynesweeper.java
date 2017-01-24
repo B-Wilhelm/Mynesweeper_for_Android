@@ -25,11 +25,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 
 public class Mynesweeper extends Game {
-    private boolean lossCheck, winCheck;
     private int endDelay;
     private int gridWidth, gridHeight;
     private int WIN_WIDTH, WIN_HEIGHT;
-    private int bombCount, curBombCount, secTimer;
+    private int bombCount, curBombCount, secTimer, mineCounter;
     private int toggleButtonIndex;
     private int clusterNum;
     private int[][] mineVals;
@@ -38,6 +37,7 @@ public class Mynesweeper extends Game {
     private float timer;
     private float btmRectHeight, topRectHeight;
     private boolean timerCheck;
+    private boolean lossCheck, winCheck;
     private String[] mineStatus, toggleButtonText;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
@@ -189,6 +189,7 @@ public class Mynesweeper extends Game {
         topRectHeight = WIN_HEIGHT-btmRectHeight-sqSide*gridHeight;
         bombCount = 20;
         curBombCount = 20;
+        mineCounter = 20;
         secTimer = 0;
         timer = 0f;
         timerCheck = false;
@@ -287,15 +288,15 @@ public class Mynesweeper extends Game {
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if(!timerCheck) { timerCheck = true; }
 
-                    if(temp.getName().equals("hidden") || temp.getName().equals("flagged")) {
+                    if(temp.getName().equals("hidden") || temp.getName().equals("flagged") || temp.getName().equals("flag")) {
                         if(toggleButtonIndex == 0 && temp.getName().equals("hidden")) {   // if ToggleButton's text is "BOMB"
                             temp.setName("revealed");
                             temp.getStyle().up = mineSkin.newDrawable("white", Color.WHITE);
                             temp.getStyle().down = mineSkin.newDrawable("white", Color.WHITE);
                         }
                         else if(toggleButtonIndex != 0) {  // if ToggleButton's text is "FLAG"
-                            if(temp.getName().equals("flagged")) {
-                                temp.setName("hidden");
+                            if(temp.getName().equals("flagged") || temp.getName().equals("flag")) {
+                                temp.setName("unflagged");
                                 curBombCount++;
                                 temp.getStyle().up = mineSkin.newDrawable("gray", mineColor);
                                 temp.getStyle().down = mineSkin.newDrawable("gray", mineColorShaded);
@@ -395,7 +396,7 @@ public class Mynesweeper extends Game {
     }
 
     private void gridProcess() {
-        String revealString, revealName;
+        String revealString, revealName, flaggedName = "", unflaggedName = "";
         TextButton temp;
 
         for(int i = 0; i < gridHeight; i++) {
@@ -420,22 +421,40 @@ public class Mynesweeper extends Game {
                     temp.setText(revealString);
                     temp.setName(revealName);
                 }
+
+                if(temp.getName().equals("flagged")) {
+                    if ((mineVals[j][i] == 9)){
+                        mineCounter--;
+                        flaggedName = "flag";
+                    }
+
+                    temp.setName(flaggedName);
+                }
+
+                if(temp.getName().equals("unflagged")) {
+                    if ((mineVals[j][i] == 9)){
+                        mineCounter++;
+                        unflaggedName = "hidden";
+                    }
+
+                    temp.setName(unflaggedName);
+                }
             }
         }
     }
 
     private void bombText() {
-        if(!lossCheck) {
-            bombLayout.setText(clockFont, "Bombs:" + curBombCount);
-            timerLayout.setText(clockFont, "Time:" + secTimer);
+        if(lossCheck) {
+            bombLayout.setText(clockFont, "YOU");
+            timerLayout.setText(clockFont, "LOSE");
         }
-        else if(!winCheck) {
+        else if(winCheck) {
             bombLayout.setText(clockFont, "YOU");
             timerLayout.setText(clockFont, "WIN");
         }
         else {
-            bombLayout.setText(clockFont, "YOU");
-            timerLayout.setText(clockFont, "WIN");
+            bombLayout.setText(clockFont, "Bombs:" + curBombCount);
+            timerLayout.setText(clockFont, "Time:" + secTimer);
         }
     }
 
