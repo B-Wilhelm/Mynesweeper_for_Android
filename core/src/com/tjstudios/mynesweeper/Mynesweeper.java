@@ -449,7 +449,7 @@ public class Mynesweeper extends Game {
                     temp.setName("hidden");
                 }
 
-                if(mineCounter <= 0 && numRevealed == (gridHeight * gridWidth - bombCount)) {
+                if((mineCounter <= 0) && (numRevealed == (gridWidth*gridHeight-bombCount))) {
                     winCheck = true;
                 }
             }
