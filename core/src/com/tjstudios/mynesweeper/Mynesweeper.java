@@ -1,6 +1,5 @@
 package com.tjstudios.mynesweeper;
 
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -65,20 +64,15 @@ public class Mynesweeper extends Game {
         setBackground();    // Sets background color
 
         Gdx.input.setInputProcessor(stage);
-//        this.setScreen(new Mynesweeper());
 //        stage.setDebugAll(true);
 	}
 
 	@Override
 	public void render() {
-
         super.render();
 
         if(endDelay < 3) {
-
-            if(lossCheck || winCheck) {
-                endDelay++;
-            }
+            if(lossCheck || winCheck) { endDelay++; }
             cameraSetup();
             bombText();
             incrementTimer();
